@@ -1,12 +1,11 @@
 package kr.jadekim.chameleon.cosmos.tool
 
 import cosmos.crypto.secp256k1.PubKey
-import cosmos.crypto.secp256k1.PubKeyJvmConverter.toByteArray
+import cosmos.crypto.secp256k1.toAny
 import cosmos.tx.signing.v1beta1.SignMode
 import cosmos.tx.v1beta1.ModeInfo
 import cosmos.tx.v1beta1.SignerInfo
 import cosmos.tx.v1beta1.Tx
-import google.protobuf.Any
 import kr.jadekim.chameleon.core.tool.FeeEstimator
 import kr.jadekim.chameleon.core.type.*
 import kr.jadekim.chameleon.core.wallet.Wallet
@@ -54,7 +53,7 @@ abstract class CosmosFeeEstimator(
         }
 
         if (fee.gasAmount > 0u) {
-            fee = fee.copy(amounts = listOf(calculateGasFee(transaction.authInfo.fee.gasLimit)))
+            fee = fee.copy(amounts = listOf(calculateGasFee(fee.gasAmount)))
 
             return fee to transaction.setFee(fee)
         }
@@ -62,7 +61,8 @@ abstract class CosmosFeeEstimator(
         val gasPrice = gasPriceProvider.get(feeDenomination)
 
         fee = try {
-            estimate(transaction, sender, gasPrice, gasAdjustment)
+            val safeLimit = CosmosFee(100_000_000u, emptyList(), "", "")
+            estimate(transaction.setFee(safeLimit), sender, gasPrice, gasAdjustment)
         } catch (e: Exception) {
             throw CosmosEstimateFeeException(transaction, sender, e.message ?: "Fail to estimate fee", e)
         }
@@ -99,10 +99,7 @@ class CosmosNodeFeeEstimator(
                 authInfo = polishedTransaction.authInfo.copy(
                     signerInfos = listOf(
                         SignerInfo(
-                            Any(
-                                PubKey.TYPE_URL,
-                                PubKey(key.publicKey).toByteArray(),
-                            ),
+                            PubKey(key.publicKey).toAny(),
                             ModeInfo(ModeInfo.SumOneOf.Single(ModeInfo.Single(SignMode.SIGN_MODE_DIRECT))),
                             0u,
                         ),

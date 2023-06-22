@@ -8,7 +8,7 @@ kotlin {
 
                 compileOnly(project(":chameleon-cosmos:chameleon-cosmos-tool"))
 
-                api(project(":chameleon-cosmos:chameleon-cosmos-proto"))
+                api("kr.jadekim:chameleon-proto-cosmos-sdk:0.47.3")
                 implementation("kr.jadekim:kotlin-protobuf-grpc:$kotlinProtobufVersion")
 
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCoroutineVersion")

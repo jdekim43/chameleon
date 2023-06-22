@@ -48,6 +48,6 @@ class TerraClassic(
 
     fun broadcast(
         sender: TerraWallet,
-        buildTransaction: CosmosTransactionBuilder.() -> Unit,
-    ) = broadcast(CosmosTransactionBuilder().apply(buildTransaction).build(), sender)
+        buildTransaction: TerraClassicTransactionBuilder.() -> Unit,
+    ) = broadcast(TerraClassicTransactionBuilder().apply(buildTransaction).build(), sender)
 }

@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "kr.jadekim"
-version = "0.1.0"
+version = "0.1.2"
 
 allprojects {
     repositories {
@@ -121,4 +121,8 @@ configure(allprojects.filter { !it.hasProperty("IGNORE_GLOBAL_CONFIGURATION") })
 subprojects {
     group = rootProject.group
     version = rootProject.version
+}
+
+tasks.withType<AbstractPublishToMaven> {
+    enabled = false
 }

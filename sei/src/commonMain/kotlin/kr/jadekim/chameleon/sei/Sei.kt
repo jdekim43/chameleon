@@ -45,6 +45,6 @@ class Sei(
 
     fun broadcast(
         sender: SeiWallet,
-        buildTransaction: CosmosTransactionBuilder.() -> Unit,
-    ) = broadcast(CosmosTransactionBuilder().apply(buildTransaction).build(), sender)
+        buildTransaction: SeiTransactionBuilder.() -> Unit,
+    ) = broadcast(SeiTransactionBuilder().apply(buildTransaction).build(), sender)
 }
