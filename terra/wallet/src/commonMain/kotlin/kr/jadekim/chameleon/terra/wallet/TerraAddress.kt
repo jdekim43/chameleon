@@ -1,9 +1,10 @@
 package kr.jadekim.chameleon.terra.wallet
 
 import kr.jadekim.chameleon.core.crypto.Bech32
-import kr.jadekim.chameleon.cosmos.key.BaseCosmosPublicKey
+import kr.jadekim.chameleon.cosmos.key.Ed25519PublicKey
+import kr.jadekim.chameleon.cosmos.key.Secp256k1PublicKey
+import kr.jadekim.chameleon.cosmos.key.toAddress
 import kr.jadekim.chameleon.cosmos.wallet.Bech32Address
-import kr.jadekim.chameleon.cosmos.wallet.toBech32Words
 import kr.jadekim.common.encoder.HEX
 
 @JvmInline
@@ -27,19 +28,27 @@ value class TerraAddress(override val text: String) : Bech32Address<TerraAddress
     companion object {
 
         @JvmStatic
-        fun createAccountAddress(publicKey: BaseCosmosPublicKey): TerraAddress = TerraAddress(
+        fun createAccountAddress(publicKey: Secp256k1PublicKey): TerraAddress = TerraAddress(
             Bech32.encode(
                 Hrp.ACCOUNT.value,
-                publicKey.toBech32Words(),
+                publicKey.toAddress(),
             ),
         )
 
         @JvmStatic
-        fun createAccountPublicKeyAddress(publicKey: BaseCosmosPublicKey): TerraAddress = TerraAddress(
+        fun createAccountPublicKeyAddress(publicKey: Secp256k1PublicKey): TerraAddress = TerraAddress(
             Bech32.encode(
                 TerraAddress.Hrp.ACCOUNT_PUBLIC_KEY.value,
                 Bech32.toWords(HEX.decode("eb5ae98721") + publicKey.publicKey),
             )
+        )
+
+        @JvmStatic
+        fun createConsensusPublicKeyAddress(publicKey: Ed25519PublicKey): TerraAddress = TerraAddress(
+            Bech32.encode(
+                Hrp.CONSENSUS_NODE.value,
+                publicKey.toAddress(),
+            ),
         )
 
         @JvmStatic

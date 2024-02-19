@@ -1,14 +1,11 @@
 package kr.jadekim.chameleon.cosmos.key
 
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
 import kr.jadekim.chameleon.core.crypto.Bip32
 import kr.jadekim.chameleon.core.crypto.Bip32KeyPair
 import kr.jadekim.chameleon.core.crypto.Bip44
 import kr.jadekim.chameleon.core.crypto.Mnemonic
-import kr.jadekim.chameleon.core.key.KeyPair
 import kr.jadekim.chameleon.core.key.MnemonicKey
-import kr.jadekim.chameleon.core.key.PublicKey
 import kr.jadekim.common.encoder.decodeBase64
 import kr.jadekim.common.extension.toFixed
 import kr.jadekim.common.extension.utf8
@@ -18,14 +15,10 @@ const val COSMOS_KEY_SIZE = 33
 
 internal fun ByteArray.toFixedKeySize() = toFixed(COSMOS_KEY_SIZE)
 
-interface BaseCosmosPublicKey : PublicKey {
+@Deprecated("Rename to Secp256k1PublicKey")
+typealias BaseCosmosPublicKey = Secp256k1PublicKey
 
-    override fun verify(message: ByteArray, signature: ByteArray): Boolean {
-        return Bip32.verify(SHA_256.hash(message), publicKey, signature)
-    }
-}
-
-open class CosmosPublicKey(publicKey: ByteArray) : BaseCosmosPublicKey {
+open class CosmosPublicKey(publicKey: ByteArray) : Secp256k1PublicKey {
 
     companion object {
 
@@ -50,20 +43,14 @@ open class CosmosPublicKey(publicKey: ByteArray) : BaseCosmosPublicKey {
     override val publicKey: ByteArray = publicKey.toFixedKeySize()
 }
 
-interface BaseCosmosKeyPair : KeyPair, BaseCosmosPublicKey {
-
-    fun signSync(message: ByteArray): ByteArray = Bip32.sign(SHA_256.hash(message), privateKey)
-
-    fun signSync(message: String): ByteArray = signSync(message.utf8())
-
-    override fun sign(message: ByteArray): Deferred<ByteArray> = CompletableDeferred(signSync(message))
-}
+@Deprecated("Rename to Secp256k1KeyPair")
+typealias BaseCosmosKeyPair = Secp256k1KeyPair
 
 open class CosmosKeyPair private constructor(
     override val privateKey: ByteArray,
     override val publicKey: ByteArray,
     unit: Unit, //avoid jvm duplicate signature
-) : BaseCosmosKeyPair, CosmosPublicKey(publicKey) {
+) : Secp256k1KeyPair, CosmosPublicKey(publicKey) {
 
     internal constructor(keyPair: Bip32KeyPair) : this(keyPair.privateKey, keyPair.publicKey)
 
@@ -73,10 +60,10 @@ open class CosmosKeyPair private constructor(
         Unit,
     )
 
-    override fun sign(message: ByteArray): Deferred<ByteArray> = super<BaseCosmosKeyPair>.sign(message)
+    override fun sign(message: ByteArray): Deferred<ByteArray> = super<Secp256k1KeyPair>.sign(message)
 }
 
-interface BaseCosmosMnemonicKey : MnemonicKey, BaseCosmosKeyPair {
+interface BaseCosmosMnemonicKey : MnemonicKey, Secp256k1KeyPair {
     val coinType: Int
     val account: Int
     val change: Int

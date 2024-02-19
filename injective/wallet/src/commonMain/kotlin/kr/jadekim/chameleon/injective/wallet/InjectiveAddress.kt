@@ -1,4 +1,4 @@
-package kr.jadekim.chameleon.sei.wallet
+package kr.jadekim.chameleon.injective.wallet
 
 import kr.jadekim.chameleon.core.crypto.Bech32
 import kr.jadekim.chameleon.cosmos.key.Ed25519PublicKey
@@ -6,17 +6,18 @@ import kr.jadekim.chameleon.cosmos.key.Secp256k1PublicKey
 import kr.jadekim.chameleon.cosmos.key.toAddress
 import kr.jadekim.chameleon.cosmos.wallet.Bech32Address
 import kr.jadekim.common.encoder.HEX
+import kr.jadekim.common.encoder.encodeHex
 
 @JvmInline
-value class SeiAddress(override val text: String) : Bech32Address<SeiAddress.Hrp> {
+value class InjectiveAddress(override val text: String) : Bech32Address<InjectiveAddress.Hrp> {
 
     enum class Hrp(val value: String) {
-        ACCOUNT("sei"),
-        ACCOUNT_PUBLIC_KEY("seipub"),
-        VALIDATOR_OPERATOR("seivaloper"),
-        VALIDATOR_OPERATOR_PUBLIC_KEY("seivaloperpub"),
-        CONSENSUS_NODE("seivalcons"),
-        CONSENSUS_NODE_PUBLIC_KEY("seivalconspub");
+        ACCOUNT("inj"),
+        ACCOUNT_PUBLIC_KEY("injpub"),
+        VALIDATOR_OPERATOR("injvaloper"),
+        VALIDATOR_OPERATOR_PUBLIC_KEY("injvaloperpub"),
+        CONSENSUS_NODE("injvalcons"),
+        CONSENSUS_NODE_PUBLIC_KEY("injvalconspub");
 
         companion object {
 
@@ -28,7 +29,7 @@ value class SeiAddress(override val text: String) : Bech32Address<SeiAddress.Hrp
     companion object {
 
         @JvmStatic
-        fun createAccountAddress(publicKey: Secp256k1PublicKey): SeiAddress = SeiAddress(
+        fun createAccountAddress(publicKey: Secp256k1PublicKey): InjectiveAddress = InjectiveAddress(
             Bech32.encode(
                 Hrp.ACCOUNT.value,
                 publicKey.toAddress(),
@@ -36,17 +37,17 @@ value class SeiAddress(override val text: String) : Bech32Address<SeiAddress.Hrp
         )
 
         @JvmStatic
-        fun createAccountPublicKeyAddress(publicKey: Secp256k1PublicKey): SeiAddress = SeiAddress(
+        fun createAccountPublicKeyAddress(publicKey: Secp256k1PublicKey): InjectiveAddress = InjectiveAddress(
             Bech32.encode(
-                SeiAddress.Hrp.ACCOUNT_PUBLIC_KEY.value,
+                InjectiveAddress.Hrp.ACCOUNT_PUBLIC_KEY.value,
                 Bech32.toWords(HEX.decode("eb5ae98721") + publicKey.publicKey),
             )
         )
 
         @JvmStatic
-        fun createConsensusPublicKeyAddress(publicKey: Ed25519PublicKey): SeiAddress = SeiAddress(
+        fun createConsensusPublicKeyAddress(publicKey: Ed25519PublicKey): InjectiveAddress = InjectiveAddress(
             Bech32.encode(
-                SeiAddress.Hrp.CONSENSUS_NODE.value,
+                InjectiveAddress.Hrp.CONSENSUS_NODE.value,
                 publicKey.toAddress()
             )
         )
@@ -61,6 +62,9 @@ value class SeiAddress(override val text: String) : Bech32Address<SeiAddress.Hrp
         }
     }
 
+    val ethereumAddress: String
+        get() = "0x${data.encodeHex()}"
+
     override fun parseHrp(text: String): Hrp = Hrp.fromHrp(text)
-        ?: throw IllegalArgumentException("Unknown bech32 hrp for sei address")
+        ?: throw IllegalArgumentException("Unknown bech32 hrp for injective address")
 }

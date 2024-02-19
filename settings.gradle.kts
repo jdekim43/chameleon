@@ -19,6 +19,9 @@ include(
     ":sei",
     ":sei:type",
     ":sei:wallet",
+    ":injective",
+    ":injective:type",
+    ":injective:wallet",
 )
 
 fun ProjectDescriptor.renameChildren() {

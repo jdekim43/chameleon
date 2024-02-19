@@ -1,4 +1,4 @@
-package kr.jadekim.chameleon.terra.key
+package kr.jadekim.chameleon.injective.key
 
 import kotlinx.coroutines.Deferred
 import kr.jadekim.chameleon.core.crypto.Bip32
@@ -10,20 +10,20 @@ import kr.jadekim.chameleon.cosmos.key.BaseCosmosMnemonicKey
 import kr.jadekim.chameleon.cosmos.key.Secp256k1PublicKey
 import kr.jadekim.common.extension.toFixed
 
-const val TERRA_KEY_SIZE = 33
+const val INJECTIVE_KEY_SIZE = 33
 
-internal fun ByteArray.toFixedKeySize() = toFixed(TERRA_KEY_SIZE)
+internal fun ByteArray.toFixedKeySize() = toFixed(INJECTIVE_KEY_SIZE)
 
-open class TerraPublicKey(publicKey: ByteArray) : Secp256k1PublicKey {
+open class InjectivePublicKey(publicKey: ByteArray) : Secp256k1PublicKey {
 
     override val publicKey: ByteArray = publicKey.toFixedKeySize()
 }
 
-open class TerraKeyPair private constructor(
+open class InjectiveKeyPair private constructor(
     override val privateKey: ByteArray,
     override val publicKey: ByteArray,
     unit: Unit, //avoid jvm duplicate signature
-) : Secp256k1KeyPair, TerraPublicKey(publicKey) {
+) : Secp256k1KeyPair, InjectivePublicKey(publicKey) {
 
     internal constructor(keyPair: Bip32KeyPair) : this(keyPair.privateKey, keyPair.publicKey)
 
@@ -36,12 +36,12 @@ open class TerraKeyPair private constructor(
     override fun sign(message: ByteArray): Deferred<ByteArray> = super<Secp256k1KeyPair>.sign(message)
 }
 
-open class TerraMnemonicKey private constructor(
+open class InjectiveMnemonicKey private constructor(
     override val mnemonic: String,
     override val index: Int = 0,
     override val passphrase: String? = null,
     bip32KeyPair: Bip32KeyPair,
-) : BaseCosmosMnemonicKey, TerraKeyPair(bip32KeyPair) {
+) : BaseCosmosMnemonicKey, InjectiveKeyPair(bip32KeyPair) {
 
     override val coinType = COIN_TYPE
     override val account = ACCOUNT
@@ -59,13 +59,13 @@ open class TerraMnemonicKey private constructor(
     )
 
     companion object {
-        const val COIN_TYPE = 330
+        const val COIN_TYPE = 118
         const val ACCOUNT = 0
         const val CHANGE = 0
 
         fun create(
             index: Int = 0,
             passphrase: String? = null,
-        ) = TerraMnemonicKey(Mnemonic.generate(), index, passphrase)
+        ) = InjectiveMnemonicKey(Mnemonic.generate(), index, passphrase)
     }
 }

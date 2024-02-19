@@ -1,11 +1,11 @@
 package kr.jadekim.chameleon.cosmos.wallet
 
 import kr.jadekim.chameleon.core.crypto.Bech32
-import kr.jadekim.chameleon.core.crypto.Ripemd160
 import kr.jadekim.chameleon.core.wallet.Address
-import kr.jadekim.chameleon.cosmos.key.BaseCosmosPublicKey
+import kr.jadekim.chameleon.cosmos.key.Ed25519PublicKey
+import kr.jadekim.chameleon.cosmos.key.Secp256k1PublicKey
+import kr.jadekim.chameleon.cosmos.key.toAddress
 import kr.jadekim.common.encoder.HEX
-import kr.jadekim.common.hash.SHA_256
 
 interface Bech32Address<HRP> : Address {
 
@@ -18,15 +18,13 @@ interface Bech32Address<HRP> : Address {
 
     override val data: ByteArray
         get() {
-            val (_, data) = Bech32.decode(text)
+            val (_, words) = Bech32.decode(text)
 
-            return data
+            return Bech32.fromWords(words)
         }
 
     fun parseHrp(text: String): HRP
 }
-
-fun BaseCosmosPublicKey.toBech32Words(): ByteArray = Bech32.toWords(Ripemd160.hash(SHA_256.hash(publicKey)))
 
 @JvmInline
 value class CosmosAddress(override val text: String) : Bech32Address<CosmosAddress.Hrp> {
@@ -49,18 +47,26 @@ value class CosmosAddress(override val text: String) : Bech32Address<CosmosAddre
     companion object {
 
         @JvmStatic
-        fun createAccountAddress(publicKey: BaseCosmosPublicKey): CosmosAddress = CosmosAddress(
+        fun createAccountAddress(publicKey: Secp256k1PublicKey): CosmosAddress = CosmosAddress(
             Bech32.encode(
                 CosmosAddress.Hrp.ACCOUNT.value,
-                publicKey.toBech32Words(),
+                publicKey.toAddress(),
             ),
         )
 
         @JvmStatic
-        fun createAccountPublicKeyAddress(publicKey: BaseCosmosPublicKey): CosmosAddress = CosmosAddress(
+        fun createAccountPublicKeyAddress(publicKey: Secp256k1PublicKey): CosmosAddress = CosmosAddress(
             Bech32.encode(
                 CosmosAddress.Hrp.ACCOUNT_PUBLIC_KEY.value,
                 Bech32.toWords(HEX.decode("eb5ae98721") + publicKey.publicKey),
+            )
+        )
+
+        @JvmStatic
+        fun createConsensusPublicKeyAddress(publicKey: Ed25519PublicKey): CosmosAddress = CosmosAddress(
+            Bech32.encode(
+                CosmosAddress.Hrp.CONSENSUS_NODE.value,
+                publicKey.toAddress()
             )
         )
 

@@ -42,11 +42,11 @@ public class Bech32 {
 
     public static class Bech32Data {
         public final String hrp;
-        public final byte[] data;
+        public final byte[] words;
 
-        private Bech32Data(final String hrp, final byte[] data) {
+        private Bech32Data(final String hrp, final byte[] words) {
             this.hrp = hrp;
-            this.data = data;
+            this.words = words;
         }
     }
 
@@ -113,7 +113,7 @@ public class Bech32 {
      * Encode a Bech32 string.
      */
     public static String encode(final Bech32Data bech32) {
-        return encode(bech32.hrp, bech32.data);
+        return encode(bech32.hrp, bech32.words);
     }
 
     /**
@@ -211,5 +211,9 @@ public class Bech32 {
 
     public static byte[] toWords(byte[] bytes) {
         return convert(bytes, 8, 5, true);
+    }
+
+    public static byte[] fromWords(byte[] bytes) {
+        return convert(bytes, 5, 8, false);
     }
 }
