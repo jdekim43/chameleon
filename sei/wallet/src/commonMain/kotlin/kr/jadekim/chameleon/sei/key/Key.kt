@@ -5,8 +5,9 @@ import kr.jadekim.chameleon.core.crypto.Bip32
 import kr.jadekim.chameleon.core.crypto.Bip32KeyPair
 import kr.jadekim.chameleon.core.crypto.Bip44
 import kr.jadekim.chameleon.core.crypto.Mnemonic
-import kr.jadekim.chameleon.cosmos.key.Secp256k1KeyPair
 import kr.jadekim.chameleon.cosmos.key.BaseCosmosMnemonicKey
+import kr.jadekim.chameleon.cosmos.key.Ed25519PublicKey
+import kr.jadekim.chameleon.cosmos.key.Secp256k1KeyPair
 import kr.jadekim.chameleon.cosmos.key.Secp256k1PublicKey
 import kr.jadekim.common.extension.toFixed
 
@@ -67,5 +68,13 @@ open class SeiMnemonicKey private constructor(
             index: Int = 0,
             passphrase: String? = null,
         ) = SeiMnemonicKey(Mnemonic.generate(), index, passphrase)
+    }
+}
+
+open class SeiConsensusPublicKey(override val publicKey: ByteArray) : Ed25519PublicKey {
+
+    @Deprecated("Not yet implemented")
+    override fun verify(message: ByteArray, signature: ByteArray): Boolean {
+        TODO("Not yet implemented")
     }
 }

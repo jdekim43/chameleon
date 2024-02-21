@@ -1,4 +1,4 @@
-package kr.jadekim.chameleon.sei
+package kr.jadekim.chameleon.injective
 
 import cosmos.base.v1beta1.Coin
 import cosmos.crypto.secp256k1.toAny
@@ -6,7 +6,7 @@ import cosmos.tx.signing.v1beta1.SignMode
 import cosmos.tx.v1beta1.*
 import google.protobuf.Any
 
-class SeiTransactionBuilder {
+class InjectiveTransactionBuilder {
 
     private val messages: MutableList<Any> = mutableListOf()
     private var memo: String = ""
@@ -15,39 +15,40 @@ class SeiTransactionBuilder {
     private val nonCriticalExtensionOptions: MutableList<Any> = mutableListOf()
     private val signerInfos: MutableList<SignerInfo> = mutableListOf()
     private var fee: Fee = Fee(emptyList(), 0u, "", "")
+    private var tip: Tip = Tip(emptyList(), "")
     private val signatures: MutableList<ByteArray> = mutableListOf()
 
-    fun message(vararg message: Any): SeiTransactionBuilder {
+    fun message(vararg message: Any): InjectiveTransactionBuilder {
         this.messages.addAll(message)
 
         return this
     }
 
-    fun memo(memo: String): SeiTransactionBuilder {
+    fun memo(memo: String): InjectiveTransactionBuilder {
         this.memo = memo
 
         return this
     }
 
-    fun timeoutHeight(timeoutHeight: ULong): SeiTransactionBuilder {
+    fun timeoutHeight(timeoutHeight: ULong): InjectiveTransactionBuilder {
         this.timeoutHeight = timeoutHeight
 
         return this
     }
 
-    fun extensionOption(vararg option: Any): SeiTransactionBuilder {
+    fun extensionOption(vararg option: Any): InjectiveTransactionBuilder {
         this.extensionOptions.addAll(option)
 
         return this
     }
 
-    fun nonCriticalExtensionOption(vararg option: Any): SeiTransactionBuilder {
+    fun nonCriticalExtensionOption(vararg option: Any): InjectiveTransactionBuilder {
         this.nonCriticalExtensionOptions.addAll(option)
 
         return this
     }
 
-    fun signer(vararg signerInfo: SignerInfo): SeiTransactionBuilder {
+    fun signer(vararg signerInfo: SignerInfo): InjectiveTransactionBuilder {
         this.signerInfos.addAll(signerInfo)
 
         return this
@@ -67,19 +68,25 @@ class SeiTransactionBuilder {
         signMode,
     )
 
-    fun fee(fee: Fee): SeiTransactionBuilder {
+    fun fee(fee: Fee): InjectiveTransactionBuilder {
         this.fee = fee
 
         return this
     }
 
-    fun fee(gasLimit: ULong, vararg coin: Coin): SeiTransactionBuilder {
+    fun fee(gasLimit: ULong, vararg coin: Coin): InjectiveTransactionBuilder {
         this.fee = fee.copy(amount = fee.amount + coin, gasLimit = gasLimit)
 
         return this
     }
 
-    fun signature(vararg signature: ByteArray): SeiTransactionBuilder {
+    fun tip(tip: Tip): InjectiveTransactionBuilder {
+        this.tip = tip
+
+        return this
+    }
+
+    fun signature(vararg signature: ByteArray): InjectiveTransactionBuilder {
         this.signatures.addAll(signature)
 
         return this
@@ -96,6 +103,7 @@ class SeiTransactionBuilder {
         authInfo = AuthInfo(
             signerInfos = signerInfos,
             fee = fee,
+            tip = tip,
         ),
         signatures = signatures,
     )

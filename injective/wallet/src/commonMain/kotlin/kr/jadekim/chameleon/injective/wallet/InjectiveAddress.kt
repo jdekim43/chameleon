@@ -39,7 +39,7 @@ value class InjectiveAddress(override val text: String) : Bech32Address<Injectiv
         @JvmStatic
         fun createAccountPublicKeyAddress(publicKey: Secp256k1PublicKey): InjectiveAddress = InjectiveAddress(
             Bech32.encode(
-                InjectiveAddress.Hrp.ACCOUNT_PUBLIC_KEY.value,
+                Hrp.ACCOUNT_PUBLIC_KEY.value,
                 Bech32.toWords(HEX.decode("eb5ae98721") + publicKey.publicKey),
             )
         )
@@ -47,7 +47,7 @@ value class InjectiveAddress(override val text: String) : Bech32Address<Injectiv
         @JvmStatic
         fun createConsensusPublicKeyAddress(publicKey: Ed25519PublicKey): InjectiveAddress = InjectiveAddress(
             Bech32.encode(
-                InjectiveAddress.Hrp.CONSENSUS_NODE.value,
+                Hrp.CONSENSUS_NODE.value,
                 publicKey.toAddress()
             )
         )

@@ -103,3 +103,11 @@ open class CosmosMnemonicKey private constructor(
         ) = CosmosMnemonicKey(Mnemonic.generate(), index, passphrase)
     }
 }
+
+open class CosmosConsensusPublicKey(override val publicKey: ByteArray) : Ed25519PublicKey {
+
+    @Deprecated("Not yet implemented")
+    override fun verify(message: ByteArray, signature: ByteArray): Boolean {
+        TODO("Not yet implemented")
+    }
+}

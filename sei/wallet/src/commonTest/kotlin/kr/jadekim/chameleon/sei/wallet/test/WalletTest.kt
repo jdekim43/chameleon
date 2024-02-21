@@ -2,8 +2,6 @@ package kr.jadekim.chameleon.sei.wallet.test
 
 import kr.jadekim.chameleon.core.key.privateKeyHex
 import kr.jadekim.chameleon.core.key.publicKeyHex
-import kr.jadekim.chameleon.cosmos.key.CosmosKeyPair
-import kr.jadekim.chameleon.cosmos.wallet.CosmosWallet
 import kr.jadekim.chameleon.sei.key.SeiKeyPair
 import kr.jadekim.chameleon.sei.wallet.SeiAddress
 import kr.jadekim.chameleon.sei.wallet.SeiWallet

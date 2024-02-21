@@ -38,7 +38,7 @@ value class SeiAddress(override val text: String) : Bech32Address<SeiAddress.Hrp
         @JvmStatic
         fun createAccountPublicKeyAddress(publicKey: Secp256k1PublicKey): SeiAddress = SeiAddress(
             Bech32.encode(
-                SeiAddress.Hrp.ACCOUNT_PUBLIC_KEY.value,
+                Hrp.ACCOUNT_PUBLIC_KEY.value,
                 Bech32.toWords(HEX.decode("eb5ae98721") + publicKey.publicKey),
             )
         )
@@ -46,7 +46,7 @@ value class SeiAddress(override val text: String) : Bech32Address<SeiAddress.Hrp
         @JvmStatic
         fun createConsensusPublicKeyAddress(publicKey: Ed25519PublicKey): SeiAddress = SeiAddress(
             Bech32.encode(
-                SeiAddress.Hrp.CONSENSUS_NODE.value,
+                Hrp.CONSENSUS_NODE.value,
                 publicKey.toAddress()
             )
         )
