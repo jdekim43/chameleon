@@ -45,7 +45,7 @@ value class InjectiveAddress(override val text: String) : Bech32Address<Injectiv
         )
 
         @JvmStatic
-        fun createConsensusPublicKeyAddress(publicKey: Ed25519PublicKey): InjectiveAddress = InjectiveAddress(
+        fun createConsensusAddress(publicKey: Ed25519PublicKey): InjectiveAddress = InjectiveAddress(
             Bech32.encode(
                 Hrp.CONSENSUS_NODE.value,
                 publicKey.toAddress()

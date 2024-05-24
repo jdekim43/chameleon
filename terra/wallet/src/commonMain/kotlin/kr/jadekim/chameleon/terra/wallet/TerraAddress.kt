@@ -44,7 +44,7 @@ value class TerraAddress(override val text: String) : Bech32Address<TerraAddress
         )
 
         @JvmStatic
-        fun createConsensusPublicKeyAddress(publicKey: Ed25519PublicKey): TerraAddress = TerraAddress(
+        fun createConsensusAddress(publicKey: Ed25519PublicKey): TerraAddress = TerraAddress(
             Bech32.encode(
                 Hrp.CONSENSUS_NODE.value,
                 publicKey.toAddress(),

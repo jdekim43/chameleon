@@ -63,7 +63,7 @@ value class CosmosAddress(override val text: String) : Bech32Address<CosmosAddre
         )
 
         @JvmStatic
-        fun createConsensusPublicKeyAddress(publicKey: Ed25519PublicKey): CosmosAddress = CosmosAddress(
+        fun createConsensusAddress(publicKey: Ed25519PublicKey): CosmosAddress = CosmosAddress(
             Bech32.encode(
                 CosmosAddress.Hrp.CONSENSUS_NODE.value,
                 publicKey.toAddress()

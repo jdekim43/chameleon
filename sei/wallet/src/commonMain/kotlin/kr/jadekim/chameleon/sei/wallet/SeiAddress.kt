@@ -44,7 +44,7 @@ value class SeiAddress(override val text: String) : Bech32Address<SeiAddress.Hrp
         )
 
         @JvmStatic
-        fun createConsensusPublicKeyAddress(publicKey: Ed25519PublicKey): SeiAddress = SeiAddress(
+        fun createConsensusAddress(publicKey: Ed25519PublicKey): SeiAddress = SeiAddress(
             Bech32.encode(
                 Hrp.CONSENSUS_NODE.value,
                 publicKey.toAddress()
