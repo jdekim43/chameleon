@@ -5,10 +5,11 @@ kotlin {
             dependencies {
                 val kotlinProtobufVersion: String by project
                 val kotlinxCoroutineVersion: String by project
+                val cosmosSdkVersion: String by project
 
                 compileOnly(project(":chameleon-cosmos:chameleon-cosmos-tool"))
 
-                api("kr.jadekim:chameleon-proto-cosmos-sdk:0.47.3")
+                implementation("kr.jadekim:chameleon-proto-cosmos-sdk:$cosmosSdkVersion")
                 implementation("kr.jadekim:kotlin-protobuf-grpc:$kotlinProtobufVersion")
 
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCoroutineVersion")

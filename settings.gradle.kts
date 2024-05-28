@@ -22,6 +22,9 @@ include(
     ":injective",
     ":injective:type",
     ":injective:wallet",
+    ":initia",
+    ":initia:type",
+    ":initia:wallet",
 )
 
 fun ProjectDescriptor.renameChildren() {

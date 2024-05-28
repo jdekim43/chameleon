@@ -8,7 +8,7 @@ import kr.jadekim.chameleon.cosmos.tool.AccountInfoProvider
 
 class AlwaysFetchAccountInfoProvider(client: CosmosGrpcClient) : AccountInfoProvider {
 
-    private val service = client.service(cosmos.auth.v1beta1.Query)
+    private val service = client.service(cosmos.auth.v1beta1.grpc.QueryGrpc)
 
     override suspend fun get(walletAddress: String): AccountInfo? {
         val account = try {

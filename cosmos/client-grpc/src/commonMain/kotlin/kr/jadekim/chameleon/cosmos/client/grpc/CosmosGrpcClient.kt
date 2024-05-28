@@ -14,7 +14,8 @@ interface CosmosGrpcClient : CoroutineScope {
 
     val option: ClientOption
 
-    fun <Client : Any, Service : GrpcService<*, *, Client>> service(service: Service): Client = service.createClient(option)
+    fun <Client : Any, Service : GrpcService<*, Client>> service(service: Service): Client =
+        service.createClient(option)
 }
 
 class SimpleCosmosGrpcClient(
@@ -24,9 +25,9 @@ class SimpleCosmosGrpcClient(
 
     override val coroutineContext: CoroutineContext = coroutineContext ?: CoroutineName("CosmosGrpcClient")
 
-    private val clients = mutableMapOf<GrpcService<*, *, *>, Any>()
+    private val clients = mutableMapOf<GrpcService<*, *>, Any>()
 
-    override fun <Client : Any, Service : GrpcService<*, *, Client>> service(service: Service): Client {
+    override fun <Client : Any, Service : GrpcService<*, Client>> service(service: Service): Client {
         @Suppress("UNCHECKED_CAST")
         return clients.getOrPut(service) { super.service(service) } as Client
     }

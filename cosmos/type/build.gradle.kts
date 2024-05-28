@@ -8,9 +8,14 @@ kotlin {
 
         val commonMain by getting {
             dependencies {
+                val cosmosSdkVersion: String by project
+                val cosmosProtoVersion: String by project
+
                 api(project(":chameleon-core:chameleon-core-type"))
 
-                api("kr.jadekim:chameleon-proto-cosmos-sdk:0.47.3")
+                api("kr.jadekim:chameleon-proto-cosmos-sdk:$cosmosSdkVersion")
+
+                implementation("kr.jadekim:chameleon-proto-cosmos-proto:$cosmosProtoVersion")
             }
         }
     }

@@ -2,7 +2,7 @@ package kr.jadekim.chameleon.cosmos.client.grpc
 
 import cosmos.base.abci.v1beta1.TxResponse
 import cosmos.tx.v1beta1.*
-import cosmos.tx.v1beta1.TxJvmConverter.toByteArray
+import cosmos.tx.v1beta1.TxConverter.toByteArray
 import io.grpc.Status
 import io.grpc.StatusException
 import kr.jadekim.chameleon.cosmos.tool.broadcaster.TransactionApi
@@ -11,7 +11,7 @@ class TransactionGrpcApi(
     client: CosmosGrpcClient,
 ) : TransactionApi {
 
-    private val service = client.service(Service)
+    private val service = client.service(cosmos.tx.v1beta1.grpc.ServiceGrpc)
 
     override suspend fun simulate(transaction: Tx): SimulateResponse {
         return service.simulate(SimulateRequest(transaction, transaction.toByteArray()))
