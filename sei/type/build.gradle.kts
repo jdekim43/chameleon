@@ -8,6 +8,7 @@ kotlin {
 
         val commonMain by getting {
             dependencies {
+                val chameleonProtoBuildVersion: String by project
                 val cosmosSdkVersion: String by project
                 val cosmwasmWasmdVersion: String by project
                 val seiVersion: String by project
@@ -15,9 +16,9 @@ kotlin {
                 api(project(":chameleon-cosmos:chameleon-cosmos-type")) {
                     exclude("kr.jadekim", "chameleon-proto-cosmos-sdk")
                 }
-                api("kr.jadekim:chameleon-proto-cosmos-sdk:$cosmosSdkVersion")
-                api("kr.jadekim:chameleon-proto-cosmwasm-wasmd:$cosmwasmWasmdVersion")
-                api("kr.jadekim:chameleon-proto-sei-chain:$seiVersion")
+                api("kr.jadekim:chameleon-proto-cosmos-sdk:$cosmosSdkVersion-$chameleonProtoBuildVersion")
+                api("kr.jadekim:chameleon-proto-cosmwasm-wasmd:$cosmwasmWasmdVersion-$chameleonProtoBuildVersion")
+                api("kr.jadekim:chameleon-proto-sei-chain:$seiVersion-$chameleonProtoBuildVersion")
             }
         }
 

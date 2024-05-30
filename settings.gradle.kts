@@ -11,6 +11,7 @@ include(
     ":cosmos:tool",
     ":cosmos:wallet",
     ":cosmos:client-grpc",
+    ":cosmos:client-grpc-gateway",
     ":terra",
     ":terra:type",
     ":terra:wallet",

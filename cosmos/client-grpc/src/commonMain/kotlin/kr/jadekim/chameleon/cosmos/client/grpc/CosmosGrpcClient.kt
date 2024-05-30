@@ -1,50 +1,36 @@
 package kr.jadekim.chameleon.cosmos.client.grpc
 
-import kotlinx.coroutines.CoroutineName
-import kotlinx.coroutines.CoroutineScope
-import kr.jadekim.protobuf.grpc.ClientOption
-import kr.jadekim.protobuf.grpc.GrpcService
-import kotlin.coroutines.CoroutineContext
+import kr.jadekim.chameleon.cosmos.tool.CosmosClient
+import kr.jadekim.protobuf.grpc.GrpcClient
+import kr.jadekim.protobuf.grpc.GrpcClientOption
+import kr.jadekim.protobuf.type.ProtobufService
+import kr.jadekim.protobuf.type.ProtobufServiceFactory
 
-interface CosmosGrpcClient : CoroutineScope {
+open class CosmosGrpcClient : GrpcClient, CosmosClient<GrpcClientOption> {
 
     companion object {
-        val DEFAULT_PORT: Int = 9090
+        val DEFAULT_PORT = 9090
     }
 
-    val option: ClientOption
+    constructor(option: GrpcClientOption) : super(option)
 
-    fun <Client : Any, Service : GrpcService<*, Client>> service(service: Service): Client =
-        service.createClient(option)
+    constructor(host: String, port: Int = DEFAULT_PORT, useTls: Boolean = false) : super(host, port, useTls)
+
+    override fun accountInfoProvider() = GrpcAccountInfoProvider(this)
+
+    override fun transactionApi() = GrpcTransactionApi(this)
 }
 
-class SimpleCosmosGrpcClient(
-    override val option: ClientOption,
-    coroutineContext: CoroutineContext? = null,
-) : CosmosGrpcClient {
+open class CachedCosmosGrpcClient : CosmosGrpcClient {
 
-    override val coroutineContext: CoroutineContext = coroutineContext ?: CoroutineName("CosmosGrpcClient")
+    constructor(option: GrpcClientOption) : super(option)
 
-    private val clients = mutableMapOf<GrpcService<*, *>, Any>()
+    constructor(host: String, port: Int = DEFAULT_PORT, useTls: Boolean = false) : super(host, port, useTls)
 
-    override fun <Client : Any, Service : GrpcService<*, Client>> service(service: Service): Client {
+    private val clients = mutableMapOf<ProtobufServiceFactory<*, *, GrpcClientOption>, ProtobufService>()
+
+    override fun <I : ProtobufService, C : I, SF : ProtobufServiceFactory<I, C, GrpcClientOption>> service(factory: SF): C {
         @Suppress("UNCHECKED_CAST")
-        return clients.getOrPut(service) { super.service(service) } as Client
+        return clients.getOrPut(factory) { super.service(factory) } as C
     }
 }
-
-fun CosmosGrpcClient(
-    host: String,
-    port: Int = CosmosGrpcClient.DEFAULT_PORT,
-    coroutineContext: CoroutineContext? = null,
-): CosmosGrpcClient = CosmosGrpcClient(DefaultCosmosGrpcClientOption(host, port), coroutineContext)
-
-fun CosmosGrpcClient(
-    option: ClientOption,
-    coroutineContext: CoroutineContext? = null,
-): CosmosGrpcClient = SimpleCosmosGrpcClient(option, coroutineContext)
-
-expect fun DefaultCosmosGrpcClientOption(
-    host: String,
-    port: Int,
-): ClientOption

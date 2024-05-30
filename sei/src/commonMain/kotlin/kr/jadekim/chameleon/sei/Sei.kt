@@ -3,26 +3,24 @@ package kr.jadekim.chameleon.sei
 import cosmos.tx.v1beta1.Tx
 import kr.jadekim.chameleon.core.tool.SemaphoreProvider
 import kr.jadekim.chameleon.core.type.BigDecimal
-import kr.jadekim.chameleon.cosmos.client.grpc.AlwaysFetchAccountInfoProvider
-import kr.jadekim.chameleon.cosmos.client.grpc.CosmosGrpcClient
-import kr.jadekim.chameleon.cosmos.client.grpc.TransactionGrpcApi
 import kr.jadekim.chameleon.cosmos.tool.*
 import kr.jadekim.chameleon.cosmos.tool.broadcaster.CosmosBroadcaster
 import kr.jadekim.chameleon.cosmos.tool.broadcaster.SyncBroadcaster
 import kr.jadekim.chameleon.sei.wallet.SeiWallet
+import kr.jadekim.protobuf.type.ProtobufServiceClientOption
 
-data class SeiOptions(
+data class SeiOptions<ClientOption : ProtobufServiceClientOption>(
     val chainId: String,
-    val client: CosmosGrpcClient,
-    val accountInfoProvider: AccountInfoProvider? = AlwaysFetchAccountInfoProvider(client),
+    val client: CosmosClient<ClientOption>,
+    val accountInfoProvider: AccountInfoProvider? = client.accountInfoProvider(),
     val gasPriceProvider: CosmosGasPriceProvider? = StaticGasPriceProvider(mapOf("usei" to BigDecimal("0.015"))),
     val feeEstimator: CosmosFeeEstimator? = gasPriceProvider?.let {
-        CosmosNodeFeeEstimator(TransactionGrpcApi(client), it)
+        CosmosNodeFeeEstimator(client.transactionApi(), it)
     },
     val semaphoreProvider: SemaphoreProvider? = null,
     val broadcaster: CosmosBroadcaster = SyncBroadcaster(
         chainId,
-        TransactionGrpcApi(client),
+        client.transactionApi(),
         feeEstimator,
         accountInfoProvider?.let { CosmosTransactionDirectSigner(it) },
         semaphoreProvider?.let {
@@ -33,13 +31,13 @@ data class SeiOptions(
     ),
 )
 
-class Sei(
+class Sei<ClientOption : ProtobufServiceClientOption>(
     val chainId: String,
     val broadcaster: CosmosBroadcaster,
-    val client: CosmosGrpcClient,
+    val client: CosmosClient<ClientOption>,
 ) {
 
-    constructor(options: SeiOptions) : this(options.chainId, options.broadcaster, options.client)
+    constructor(options: SeiOptions<ClientOption>) : this(options.chainId, options.broadcaster, options.client)
 
     fun broadcast(transaction: Tx, sender: SeiWallet) = broadcaster.broadcast(transaction, sender)
 

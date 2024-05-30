@@ -5,7 +5,6 @@ kotlin {
                 val kotlinxCoroutineVersion: String by project
 
                 api(project(":chameleon-cosmos:chameleon-cosmos-tool"))
-                api(project(":chameleon-cosmos:chameleon-cosmos-client-grpc"))
                 api(project(":chameleon-terra:chameleon-terra-wallet"))
                 api(project(":chameleon-terra-classic:chameleon-terra-classic-type"))
 
