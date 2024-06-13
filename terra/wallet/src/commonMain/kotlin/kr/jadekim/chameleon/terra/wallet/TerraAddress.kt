@@ -52,6 +52,14 @@ value class TerraAddress(override val text: String) : Bech32Address<TerraAddress
         )
 
         @JvmStatic
+        fun createConsensusAddress(bytes: ByteArray): TerraAddress = TerraAddress(
+            Bech32.encode(
+                Hrp.CONSENSUS_NODE.value,
+                Bech32.toWords(bytes),
+            )
+        )
+
+        @JvmStatic
         fun isValidAddress(address: String, hrp: Hrp): Boolean = try {
             val (parsedHrp, _) = Bech32.decode(address)
 

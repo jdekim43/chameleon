@@ -52,6 +52,14 @@ value class InitiaAddress(override val text: String) : Bech32Address<InitiaAddre
         )
 
         @JvmStatic
+        fun createConsensusAddress(bytes: ByteArray): InitiaAddress = InitiaAddress(
+            Bech32.encode(
+                Hrp.CONSENSUS_NODE.value,
+                Bech32.toWords(bytes),
+            )
+        )
+
+        @JvmStatic
         fun isValidAddress(address: String, hrp: Hrp): Boolean = try {
             val (parsedHrp, _) = Bech32.decode(address)
 

@@ -71,6 +71,14 @@ value class CosmosAddress(override val text: String) : Bech32Address<CosmosAddre
         )
 
         @JvmStatic
+        fun createConsensusAddress(bytes: ByteArray): CosmosAddress = CosmosAddress(
+            Bech32.encode(
+                Hrp.CONSENSUS_NODE.value,
+                Bech32.toWords(bytes),
+            )
+        )
+
+        @JvmStatic
         fun isValidAddress(address: String, hrp: Hrp): Boolean = try {
             val (parsedHrp, _) = Bech32.decode(address)
 
