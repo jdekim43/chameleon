@@ -40,7 +40,7 @@ value class CosmosAddress(override val text: String) : Bech32Address<CosmosAddre
         companion object {
 
             @JvmStatic
-            fun fromHrp(hrp: String): Hrp? = values().firstOrNull { it.value.equals(hrp, true) }
+            fun fromHrp(hrp: String): Hrp? = entries.firstOrNull { it.value.equals(hrp, true) }
         }
     }
 
@@ -50,7 +50,7 @@ value class CosmosAddress(override val text: String) : Bech32Address<CosmosAddre
         fun createAccountAddress(publicKey: Secp256k1PublicKey): CosmosAddress = CosmosAddress(
             Bech32.encode(
                 CosmosAddress.Hrp.ACCOUNT.value,
-                publicKey.toAddress(),
+                Bech32.toWords(publicKey.toAddress()),
             ),
         )
 

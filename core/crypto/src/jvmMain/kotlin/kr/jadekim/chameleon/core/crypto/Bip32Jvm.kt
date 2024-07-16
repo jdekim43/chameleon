@@ -13,16 +13,21 @@ actual object Bip32 {
 
     actual fun keyPair(seed: ByteArray, hdPath: IntArray): Bip32KeyPair {
         val masterKey = Bip32ECKeyPair.generateKeyPair(seed)
-        val terraHD = Bip32ECKeyPair.deriveKeyPair(masterKey, hdPath)
-        val privateKey = terraHD.privateKeyBytes33
-        val publicKey = terraHD.publicKeyPoint.getEncoded(true)
+        val derived = Bip32ECKeyPair.deriveKeyPair(masterKey, hdPath)
 
-        return Bip32KeyPair(publicKey, privateKey)
+        return Bip32KeyPair(
+            derived.publicKeyPoint.getEncoded(true),
+            derived.privateKeyBytes33,
+        )
     }
 
-    actual fun publicKeyFor(privateKey: ByteArray): ByteArray {
+    actual fun keyPair(privateKey: ByteArray): Bip32KeyPair {
         val point = Sign.publicPointFromPrivate(BigInteger(1, privateKey))
-        return point.getEncoded(true)
+
+        return Bip32KeyPair(
+            point.getEncoded(true),
+            privateKey,
+        )
     }
 
     actual fun sign(messageHash: ByteArray, privateKey: ByteArray): ByteArray {
@@ -61,5 +66,18 @@ actual object Bip32 {
         val point = CURVE.curve.decodePoint(encodedPublicKey)
 
         return point.getEncoded(true)
+    }
+
+    actual fun decompressPublicKey(publicKey: ByteArray): ByteArray {
+        val point = Sign.CURVE_PARAMS.curve.decodePoint(publicKey)
+        val x = point.xCoord.encoded
+        val y = point.yCoord.encoded
+
+        return ByteArray(1 + x.size + y.size).apply {
+            this[0] = 0x04
+
+            x.copyInto(this, 1)
+            y.copyInto(this, 1 + x.size)
+        }
     }
 }

@@ -17,7 +17,7 @@ interface Secp256k1PublicKey : PublicKey {
     }
 }
 
-fun Secp256k1PublicKey.toAddress(): ByteArray = Bech32.toWords(Ripemd160.hash(SHA_256.hash(publicKey)))
+fun Secp256k1PublicKey.toAddress(): ByteArray = Ripemd160.hash(SHA_256.hash(publicKey))
 
 interface Secp256k1KeyPair : KeyPair, Secp256k1PublicKey {
 

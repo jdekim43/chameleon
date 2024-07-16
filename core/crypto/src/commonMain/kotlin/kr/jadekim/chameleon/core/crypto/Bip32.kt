@@ -4,13 +4,15 @@ expect object Bip32 {
 
     fun keyPair(seed: ByteArray, hdPath: IntArray): Bip32KeyPair
 
-    fun publicKeyFor(privateKey: ByteArray): ByteArray
+    fun keyPair(privateKey: ByteArray): Bip32KeyPair
 
     fun sign(messageHash: ByteArray, privateKey: ByteArray): ByteArray
 
     fun verify(messageHash: ByteArray, publicKey: ByteArray, signature: ByteArray): Boolean
 
     fun recoverPublicKey(messageHash: ByteArray, signature: ByteArray): ByteArray
+
+    fun decompressPublicKey(publicKey: ByteArray): ByteArray
 }
 
 object Bip32Utils {

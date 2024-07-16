@@ -21,7 +21,7 @@ value class InitiaAddress(override val text: String) : Bech32Address<InitiaAddre
         companion object {
 
             @JvmStatic
-            fun fromHrp(hrp: String): Hrp? = values().firstOrNull { it.value.equals(hrp, true) }
+            fun fromHrp(hrp: String): Hrp? = entries.firstOrNull { it.value.equals(hrp, true) }
         }
     }
 
@@ -31,7 +31,7 @@ value class InitiaAddress(override val text: String) : Bech32Address<InitiaAddre
         fun createAccountAddress(publicKey: Secp256k1PublicKey): InitiaAddress = InitiaAddress(
             Bech32.encode(
                 Hrp.ACCOUNT.value,
-                publicKey.toAddress(),
+                Bech32.toWords(publicKey.toAddress()),
             ),
         )
 

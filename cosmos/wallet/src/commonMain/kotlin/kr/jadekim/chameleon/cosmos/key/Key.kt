@@ -56,7 +56,7 @@ open class CosmosKeyPair private constructor(
 
     constructor(privateKey: ByteArray, publicKey: ByteArray? = null) : this(
         privateKey.toFixedKeySize(),
-        publicKey?.toFixedKeySize() ?: Bip32.publicKeyFor(privateKey.toFixedKeySize()),
+        publicKey?.toFixedKeySize() ?: Bip32.keyPair(privateKey.toFixedKeySize()).publicKey,
         Unit,
     )
 
