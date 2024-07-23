@@ -1,5 +1,6 @@
 package kr.jadekim.chameleon.cosmos.client.grpc.gateway
 
+import cosmos.auth.v1beta1.QueryAccountInfoRequest
 import cosmos.auth.v1beta1.QueryAccountRequest
 import io.ktor.client.plugins.*
 import io.ktor.http.*
@@ -21,13 +22,12 @@ class GrpcGatewayAccountInfoProvider(client: CosmosGrpcGatewayClient) : AccountI
             throw e
         }
 
-        //todo: replace to service.accountInfo (It is supported at cosmos-sdk v0.47)
         val baseAccount = when (account.typeUrl) {
             cosmos.auth.v1beta1.BaseAccount.TYPE_URL -> cosmos.auth.v1beta1.BaseAccountConverter.deserialize(account.value)
             cosmos.vesting.v1beta1.PeriodicVestingAccount.TYPE_URL -> cosmos.vesting.v1beta1.PeriodicVestingAccountConverter
                 .deserialize(account.value).baseVestingAccount.baseAccount
 
-            else -> throw IllegalArgumentException("Cannot acceptable account type (${account.typeUrl})")
+            else -> service.accountInfo(QueryAccountInfoRequest(walletAddress)).info
         }
 
         return AccountInfo(
