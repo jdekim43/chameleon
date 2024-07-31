@@ -6,6 +6,7 @@ import kr.jadekim.chameleon.core.type.BigDecimal
 import kr.jadekim.chameleon.cosmos.tool.*
 import kr.jadekim.chameleon.cosmos.tool.broadcaster.CosmosBroadcaster
 import kr.jadekim.chameleon.cosmos.tool.broadcaster.SyncBroadcaster
+import kr.jadekim.chameleon.injective.tool.InjectiveTransactionDirectSigner
 import kr.jadekim.chameleon.injective.wallet.InjectiveWallet
 import kr.jadekim.protobuf.type.ProtobufServiceClientOption
 
@@ -22,7 +23,7 @@ data class InjectiveOptions<ClientOption : ProtobufServiceClientOption>(
         chainId,
         client.transactionApi(),
         feeEstimator,
-        accountInfoProvider?.let { CosmosTransactionDirectSigner(it) },
+        accountInfoProvider?.let { InjectiveTransactionDirectSigner(it) },
         semaphoreProvider?.let {
             accountInfoProvider?.let {
                 CosmosBroadcastEventHandler(semaphoreProvider, accountInfoProvider)

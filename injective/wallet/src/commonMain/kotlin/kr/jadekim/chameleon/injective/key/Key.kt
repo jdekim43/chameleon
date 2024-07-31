@@ -1,10 +1,7 @@
 package kr.jadekim.chameleon.injective.key
 
 import kotlinx.coroutines.Deferred
-import kr.jadekim.chameleon.core.crypto.Bip32
-import kr.jadekim.chameleon.core.crypto.Bip32KeyPair
-import kr.jadekim.chameleon.core.crypto.Bip44
-import kr.jadekim.chameleon.core.crypto.Mnemonic
+import kr.jadekim.chameleon.core.crypto.*
 import kr.jadekim.chameleon.cosmos.key.BaseCosmosMnemonicKey
 import kr.jadekim.chameleon.cosmos.key.Ed25519PublicKey
 import kr.jadekim.chameleon.cosmos.key.Secp256k1KeyPair
@@ -33,6 +30,8 @@ open class InjectiveKeyPair private constructor(
         publicKey?.toFixedKeySize() ?: Bip32.keyPair(privateKey.toFixedKeySize()).publicKey,
         Unit,
     )
+
+    override fun signSync(message: ByteArray): ByteArray = Bip32.sign(Keccak256.hash(message), privateKey)
 
     override fun sign(message: ByteArray): Deferred<ByteArray> = super<Secp256k1KeyPair>.sign(message)
 }

@@ -1,6 +1,5 @@
-package kr.jadekim.chameleon.cosmos.tool
+package kr.jadekim.chameleon.injective.tool
 
-import cosmos.crypto.secp256k1.toAny
 import cosmos.tx.signing.v1beta1.SignMode
 import cosmos.tx.v1beta1.AuthInfoConverter.toByteArray
 import cosmos.tx.v1beta1.ModeInfo
@@ -9,25 +8,22 @@ import cosmos.tx.v1beta1.SignDocConverter.toByteArray
 import cosmos.tx.v1beta1.SignerInfo
 import cosmos.tx.v1beta1.Tx
 import cosmos.tx.v1beta1.TxBodyConverter.toByteArray
+import injective.crypto.v1beta1.ethsecp256k1.PubKeyConverter
+import injective.crypto.v1beta1.ethsecp256k1.toAny
 import kr.jadekim.chameleon.core.key.Key
-import kr.jadekim.chameleon.core.tool.TransactionSigner
 import kr.jadekim.chameleon.core.wallet.Wallet
-import kr.jadekim.chameleon.cosmos.wallet.CosmosWallet
+import kr.jadekim.chameleon.cosmos.tool.AccountInfo
+import kr.jadekim.chameleon.cosmos.tool.AccountInfoProvider
+import kr.jadekim.chameleon.cosmos.tool.CosmosSignature
+import kr.jadekim.chameleon.cosmos.tool.CosmosTransactionSigner
+import kr.jadekim.chameleon.injective.key.InjectivePublicKey
+import kr.jadekim.chameleon.injective.wallet.InjectiveAddress
 
-data class CosmosSignature(
-    val address: String,
-    val signerInfo: SignerInfo,
-    val signature: ByteArray,
-)
+interface InjectiveTransactionSigner : CosmosTransactionSigner
 
-interface CosmosTransactionSigner : TransactionSigner<Tx> {
-
-    val signMode: SignMode
-}
-
-class CosmosTransactionDirectSigner(
+class InjectiveTransactionDirectSigner(
     val accountInfoProvider: AccountInfoProvider,
-) : CosmosTransactionSigner {
+) : InjectiveTransactionSigner {
 
     override val signMode: SignMode = SignMode.SIGN_MODE_DIRECT
 
@@ -39,7 +35,7 @@ class CosmosTransactionDirectSigner(
 
     suspend fun sign(transaction: Tx, wallet: Wallet, chainId: String): Pair<CosmosSignature, Tx> {
         val key = wallet.key ?: throw IllegalArgumentException("Wallet must have a key")
-        var signerInfo = transaction.authInfo.signerInfos.find(wallet.address.text)
+        var signerInfo = transaction.authInfo.signerInfos.findByAddress(wallet.address.text)
         val isProvidedSignerInfo = signerInfo != null
         val accountInfo = accountInfoProvider.get(wallet.address.text) ?: AccountInfo(wallet)
 
@@ -72,13 +68,18 @@ class CosmosTransactionDirectSigner(
         return CosmosSignature(wallet.address.text, signerInfo, signature) to signedTransaction
     }
 
-    private fun List<SignerInfo>.find(address: String): SignerInfo? = find {
-        it.publicKey.typeUrl == cosmos.crypto.secp256k1.PubKey.TYPE_URL
-                && CosmosWallet(cosmos.crypto.secp256k1.PubKeyConverter.deserialize(it.publicKey.value).key).address.text == address
+    private fun List<SignerInfo>.findByAddress(address: String): SignerInfo? = find {
+        if (it.publicKey.typeUrl != injective.crypto.v1beta1.ethsecp256k1.PubKey.TYPE_URL) {
+            return@find false
+        }
+
+        val publicKey = InjectivePublicKey(PubKeyConverter.deserialize(it.publicKey.value).key)
+
+        return@find InjectiveAddress.createAccountAddress(publicKey).text == address
     }
 
     private fun createSignerInfo(key: Key, accountInfo: AccountInfo) = SignerInfo(
-        cosmos.crypto.secp256k1.PubKey(key.publicKey).toAny(),
+        injective.crypto.v1beta1.ethsecp256k1.PubKey(key.publicKey).toAny(),
         ModeInfo(ModeInfo.SumOneOf.Single(ModeInfo.Single(SignMode.SIGN_MODE_DIRECT))),
         accountInfo.sequence,
     )

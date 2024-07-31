@@ -23,6 +23,7 @@ include(
     ":injective",
     ":injective:type",
     ":injective:wallet",
+    ":injective:tool",
     ":initia",
     ":initia:type",
     ":initia:wallet",

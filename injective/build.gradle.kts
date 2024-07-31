@@ -4,9 +4,9 @@ kotlin {
             dependencies {
                 val kotlinxCoroutineVersion: String by project
 
-                api(project(":chameleon-cosmos:chameleon-cosmos-tool"))
                 api(project(":chameleon-injective:chameleon-injective-type"))
                 api(project(":chameleon-injective:chameleon-injective-wallet"))
+                api(project(":chameleon-injective:chameleon-injective-tool"))
 
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCoroutineVersion")
             }
