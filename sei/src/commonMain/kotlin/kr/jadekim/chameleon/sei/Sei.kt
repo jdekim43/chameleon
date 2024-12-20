@@ -14,8 +14,10 @@ data class SeiOptions<ClientOption : ProtobufServiceClientOption>(
     val client: CosmosClient<ClientOption>,
     val accountInfoProvider: AccountInfoProvider? = client.accountInfoProvider(),
     val gasPriceProvider: CosmosGasPriceProvider? = StaticGasPriceProvider(mapOf("usei" to BigDecimal("0.015"))),
-    val feeEstimator: CosmosFeeEstimator? = gasPriceProvider?.let {
-        CosmosNodeFeeEstimator(client.transactionApi(), it)
+    val feeEstimator: CosmosFeeEstimator? = accountInfoProvider?.let { accountInfo ->
+        gasPriceProvider?.let { gas ->
+            CosmosNodeFeeEstimator(client.transactionApi(), accountInfo, gas, "usei")
+        }
     },
     val semaphoreProvider: SemaphoreProvider? = null,
     val broadcaster: CosmosBroadcaster = SyncBroadcaster(
@@ -25,7 +27,7 @@ data class SeiOptions<ClientOption : ProtobufServiceClientOption>(
         accountInfoProvider?.let { CosmosTransactionDirectSigner(it) },
         semaphoreProvider?.let {
             accountInfoProvider?.let {
-                CosmosBroadcastEventHandler(semaphoreProvider, accountInfoProvider)
+                CosmosBroadcastEventHook(semaphoreProvider, accountInfoProvider)
             }
         }
     ),

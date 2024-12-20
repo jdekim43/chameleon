@@ -15,8 +15,10 @@ data class InjectiveOptions<ClientOption : ProtobufServiceClientOption>(
     val client: CosmosClient<ClientOption>,
     val accountInfoProvider: AccountInfoProvider? = client.accountInfoProvider(),
     val gasPriceProvider: CosmosGasPriceProvider? = StaticGasPriceProvider(mapOf("inj" to BigDecimal("160000000"))),
-    val feeEstimator: CosmosFeeEstimator? = gasPriceProvider?.let {
-        CosmosNodeFeeEstimator(client.transactionApi(), it)
+    val feeEstimator: CosmosFeeEstimator? = accountInfoProvider?.let { accountInfo ->
+        gasPriceProvider?.let { gas ->
+            CosmosNodeFeeEstimator(client.transactionApi(), accountInfo, gas, "inj")
+        }
     },
     val semaphoreProvider: SemaphoreProvider? = null,
     val broadcaster: CosmosBroadcaster = SyncBroadcaster(
@@ -26,7 +28,7 @@ data class InjectiveOptions<ClientOption : ProtobufServiceClientOption>(
         accountInfoProvider?.let { InjectiveTransactionDirectSigner(it) },
         semaphoreProvider?.let {
             accountInfoProvider?.let {
-                CosmosBroadcastEventHandler(semaphoreProvider, accountInfoProvider)
+                CosmosBroadcastEventHook(semaphoreProvider, accountInfoProvider)
             }
         }
     ),

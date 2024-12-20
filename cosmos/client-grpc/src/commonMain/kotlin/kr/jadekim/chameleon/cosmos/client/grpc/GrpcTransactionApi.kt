@@ -21,7 +21,7 @@ class GrpcTransactionApi(client: CosmosGrpcClient) : TransactionApi {
                 GetTxRequest(transactionHash),
             ).txResponse
         } catch (e: StatusException) {
-            if (e.status == Status.NOT_FOUND) {
+            if (e.status.code == Status.NOT_FOUND.code) {
                 return null
             }
 

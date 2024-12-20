@@ -1,12 +1,12 @@
 plugins {
-    kotlin("multiplatform") version "1.9.24"
+    kotlin("multiplatform") version "2.0.21"
     id("org.jetbrains.dokka") version "1.9.20"
     id("maven-publish")
     id("signing")
 }
 
 group = "kr.jadekim"
-version = "0.3.4"
+version = "0.4.3"
 
 allprojects {
     repositories {
@@ -24,8 +24,8 @@ configure(allprojects.filter { !it.hasProperty("IGNORE_GLOBAL_CONFIGURATION") })
     }
 
     kotlin {
+        jvmToolchain(11)
         jvm {
-            jvmToolchain(11)
             testRuns["test"].executionTask.configure {
                 useJUnitPlatform()
             }
@@ -115,6 +115,11 @@ configure(allprojects.filter { !it.hasProperty("IGNORE_GLOBAL_CONFIGURATION") })
 
     signing {
         sign(publishing.publications)
+    }
+
+    val signingTasks = tasks.withType<Sign>()
+    tasks.withType<AbstractPublishToMaven>().configureEach {
+        mustRunAfter(signingTasks)
     }
 }
 

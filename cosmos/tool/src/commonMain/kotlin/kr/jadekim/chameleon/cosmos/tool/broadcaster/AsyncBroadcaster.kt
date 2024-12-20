@@ -4,7 +4,7 @@ import cosmos.base.abci.v1beta1.TxResponse
 import cosmos.tx.v1beta1.Tx
 import kr.jadekim.chameleon.core.tool.FeeEstimator
 import kr.jadekim.chameleon.core.tool.TransactionSigner
-import kr.jadekim.chameleon.core.tool.broadcaster.BroadcastEventHandler
+import kr.jadekim.chameleon.core.tool.broadcaster.BroadcastEventHook
 import kotlin.coroutines.CoroutineContext
 
 class AsyncBroadcaster(
@@ -12,7 +12,7 @@ class AsyncBroadcaster(
     private val transactionApi: TransactionApi,
     feeEstimator: FeeEstimator<Tx>? = null,
     signer: TransactionSigner<Tx>? = null,
-    handler: BroadcastEventHandler<Tx, TxResponse>? = null,
+    handler: BroadcastEventHook<Tx, TxResponse>? = null,
     coroutineContext: CoroutineContext? = null,
 ) : CosmosBroadcaster(chainId, feeEstimator, signer, handler, coroutineContext) {
 

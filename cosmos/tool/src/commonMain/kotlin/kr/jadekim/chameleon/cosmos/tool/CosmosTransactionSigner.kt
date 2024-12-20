@@ -25,7 +25,7 @@ interface CosmosTransactionSigner : TransactionSigner<Tx> {
     val signMode: SignMode
 }
 
-class CosmosTransactionDirectSigner(
+open class CosmosTransactionDirectSigner(
     val accountInfoProvider: AccountInfoProvider,
 ) : CosmosTransactionSigner {
 
@@ -39,7 +39,7 @@ class CosmosTransactionDirectSigner(
 
     suspend fun sign(transaction: Tx, wallet: Wallet, chainId: String): Pair<CosmosSignature, Tx> {
         val key = wallet.key ?: throw IllegalArgumentException("Wallet must have a key")
-        var signerInfo = transaction.authInfo.signerInfos.find(wallet.address.text)
+        var signerInfo = transaction.authInfo.signerInfos.findByAddress(wallet.address.text)
         val isProvidedSignerInfo = signerInfo != null
         val accountInfo = accountInfoProvider.get(wallet.address.text) ?: AccountInfo(wallet)
 
@@ -72,12 +72,12 @@ class CosmosTransactionDirectSigner(
         return CosmosSignature(wallet.address.text, signerInfo, signature) to signedTransaction
     }
 
-    private fun List<SignerInfo>.find(address: String): SignerInfo? = find {
+    protected open fun List<SignerInfo>.findByAddress(address: String): SignerInfo? = find {
         it.publicKey.typeUrl == cosmos.crypto.secp256k1.PubKey.TYPE_URL
                 && CosmosWallet(cosmos.crypto.secp256k1.PubKeyConverter.deserialize(it.publicKey.value).key).address.text == address
     }
 
-    private fun createSignerInfo(key: Key, accountInfo: AccountInfo) = SignerInfo(
+    protected open fun createSignerInfo(key: Key, accountInfo: AccountInfo) = SignerInfo(
         cosmos.crypto.secp256k1.PubKey(key.publicKey).toAny(),
         ModeInfo(ModeInfo.SumOneOf.Single(ModeInfo.Single(SignMode.SIGN_MODE_DIRECT))),
         accountInfo.sequence,

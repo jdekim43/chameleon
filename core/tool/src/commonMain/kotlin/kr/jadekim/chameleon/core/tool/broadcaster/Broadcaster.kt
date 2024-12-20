@@ -9,7 +9,7 @@ abstract class Broadcaster<Transaction : Any, TransactionResult : Any>(
     val chainId: String,
     val feeEstimator: FeeEstimator<Transaction>? = null,
     val signer: TransactionSigner<Transaction>? = null,
-    val handler: BroadcastEventHandler<Transaction, TransactionResult>? = null,
+    val hook: BroadcastEventHook<Transaction, TransactionResult>? = null,
     coroutineContext: CoroutineContext? = null,
 ) : CoroutineScope {
 
@@ -25,14 +25,14 @@ abstract class Broadcaster<Transaction : Any, TransactionResult : Any>(
         try {
             polishedTransaction = feeEstimator?.invoke(polishedTransaction, sender) ?: transaction
 
-            handler?.onStart(chainId, sender, transaction)
+            hook?.onStart(chainId, sender, transaction)
             polishedTransaction = signer?.invoke(polishedTransaction, sender, chainId) ?: transaction
 
             requestBroadcast(polishedTransaction).also {
-                handler?.onFinish(chainId, sender, transaction, it)
+                hook?.onSucceed(chainId, sender, transaction, it)
             }
         } catch (e: Throwable) {
-            handler?.onError(chainId, sender, transaction, e)
+            hook?.onError(chainId, sender, transaction, e)
 
             throw e
         }

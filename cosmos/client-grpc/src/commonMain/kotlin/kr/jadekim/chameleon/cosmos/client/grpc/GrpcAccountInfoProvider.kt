@@ -15,7 +15,7 @@ class GrpcAccountInfoProvider(client: CosmosGrpcClient) : AccountInfoProvider {
         val account = try {
             service.account(QueryAccountRequest(walletAddress)).account
         } catch (e: StatusException) {
-            if (e.status == Status.NOT_FOUND) {
+            if (e.status.code == Status.NOT_FOUND.code) {
                 return null
             }
 

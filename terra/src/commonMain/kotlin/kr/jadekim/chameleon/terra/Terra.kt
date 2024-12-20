@@ -14,8 +14,10 @@ data class TerraOptions<ClientOption : ProtobufServiceClientOption>(
     val client: CosmosClient<ClientOption>,
     val accountInfoProvider: AccountInfoProvider? = client.accountInfoProvider(),
     val gasPriceProvider: CosmosGasPriceProvider? = StaticGasPriceProvider(mapOf("uluna" to BigDecimal("0.015"))),
-    val feeEstimator: CosmosFeeEstimator? = gasPriceProvider?.let {
-        CosmosNodeFeeEstimator(client.transactionApi(), it)
+    val feeEstimator: CosmosFeeEstimator? = accountInfoProvider?.let { accountInfo ->
+        gasPriceProvider?.let { gas ->
+            CosmosNodeFeeEstimator(client.transactionApi(), accountInfo, gas, "uluna")
+        }
     },
     val semaphoreProvider: SemaphoreProvider? = null,
     val broadcaster: CosmosBroadcaster = SyncBroadcaster(
@@ -25,7 +27,7 @@ data class TerraOptions<ClientOption : ProtobufServiceClientOption>(
         accountInfoProvider?.let { CosmosTransactionDirectSigner(it) },
         semaphoreProvider?.let {
             accountInfoProvider?.let {
-                CosmosBroadcastEventHandler(semaphoreProvider, accountInfoProvider)
+                CosmosBroadcastEventHook(semaphoreProvider, accountInfoProvider)
             }
         }
     ),

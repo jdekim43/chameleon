@@ -24,24 +24,17 @@ open class CosmosEstimateFeeException(
 abstract class CosmosFeeEstimator(
     val gasPriceProvider: CosmosGasPriceProvider,
     var feeDenomination: String,
-    var gasAdjustment: Float = DEFAULT_GAS_ADJUSTMENT,
 ) : FeeEstimator<Tx> {
-
-    companion object {
-        const val DEFAULT_GAS_ADJUSTMENT: Float = 1.2f
-    }
 
     constructor(
         gasPrices: Map<String, BigDecimal>,
         feeDenomination: String,
-        gasAdjustment: Float = DEFAULT_GAS_ADJUSTMENT,
-    ) : this(StaticGasPriceProvider(gasPrices), feeDenomination, gasAdjustment)
+    ) : this(StaticGasPriceProvider(gasPrices), feeDenomination)
 
     protected abstract suspend fun estimate(
         transaction: Tx,
         sender: Wallet,
         gasPrice: CoinDecimal,
-        gasAdjustment: Float,
     ): CosmosFee
 
     override suspend fun invoke(transaction: Tx, sender: Wallet): Tx = estimate(transaction, sender).second
@@ -61,8 +54,7 @@ abstract class CosmosFeeEstimator(
         val gasPrice = gasPriceProvider.get(feeDenomination)
 
         fee = try {
-            val safeLimit = CosmosFee(100_000_000u, emptyList(), "", "")
-            estimate(transaction.setFee(safeLimit), sender, gasPrice, gasAdjustment)
+            estimate(transaction, sender, gasPrice)
         } catch (e: Exception) {
             throw CosmosEstimateFeeException(transaction, sender, e.message ?: "Fail to estimate fee", e)
         }
@@ -73,47 +65,65 @@ abstract class CosmosFeeEstimator(
     suspend fun calculateGasFee(gasAmount: ULong): Coin {
         val gasPrice = gasPriceProvider.get(feeDenomination)
 
-        return (gasAdjustment.toBigDecimal() * gasAmount.toBigDecimal() * gasPrice).toCoin()
+        return (gasAmount.toBigDecimal() * gasPrice).toCoin()
     }
 
-    private fun Tx.setFee(fee: CosmosFee): Tx = copy(authInfo = authInfo.copy(fee = fee.toProto()))
+    protected fun Tx.setFee(fee: CosmosFee): Tx = copy(authInfo = authInfo.copy(fee = fee.toProto()))
 }
 
-class CosmosNodeFeeEstimator(
+open class CosmosNodeFeeEstimator(
     private val transactionApi: TransactionApi,
+    private val accountInfoProvider: AccountInfoProvider,
     gasPriceProvider: CosmosGasPriceProvider,
-    feeDenomination: String = "uatom",
-    gasAdjustment: Float = DEFAULT_GAS_ADJUSTMENT,
-) : CosmosFeeEstimator(gasPriceProvider, feeDenomination, gasAdjustment) {
+    feeDenomination: String,
+    var gasAdjustment: Float = DEFAULT_GAS_ADJUSTMENT,
+    var simulateGasLimit: ULong = 10_000_000u,
+) : CosmosFeeEstimator(gasPriceProvider, feeDenomination) {
+
+    companion object {
+        const val DEFAULT_GAS_ADJUSTMENT: Float = 1.2f
+    }
 
     override suspend fun estimate(
         transaction: Tx,
         sender: Wallet,
         gasPrice: CoinDecimal,
-        gasAdjustment: Float,
     ): CosmosFee {
-        var polishedTransaction = transaction
-        if (polishedTransaction.authInfo.signerInfos.isEmpty()) {
-            val key = sender.key ?: throw IllegalArgumentException("Wallet must have a key")
-            polishedTransaction = polishedTransaction.copy(
-                authInfo = polishedTransaction.authInfo.copy(
-                    signerInfos = listOf(
-                        SignerInfo(
-                            PubKey(key.publicKey).toAny(),
-                            ModeInfo(ModeInfo.SumOneOf.Single(ModeInfo.Single(SignMode.SIGN_MODE_DIRECT))),
-                            0u,
-                        ),
-                    ),
-                ),
-            )
-        }
-
-        val result = transactionApi.simulate(polishedTransaction)
+        val result = transactionApi.simulate(polishTransaction(transaction, sender))
 
         return CosmosFee(
             (result.gasInfo.gasUsed.toDouble() * gasAdjustment).toULong(),
             gasPrice,
             sender.address.text,
+        )
+    }
+
+    protected open suspend fun polishTransaction(transaction: Tx, sender: Wallet): Tx {
+        var polishedTransaction = transaction
+
+        val safeLimit = CosmosFee(simulateGasLimit, emptyList(), "", "")
+        polishedTransaction = polishedTransaction.setFee(safeLimit)
+
+        if (polishedTransaction.authInfo.signerInfos.isEmpty()) {
+            polishedTransaction = polishedTransaction.copy(
+                authInfo = polishedTransaction.authInfo.copy(
+                    signerInfos = listOf(createSignerInfo(sender)),
+                ),
+                signatures = listOf(byteArrayOf())
+            )
+        }
+
+        return polishedTransaction
+    }
+
+    protected open suspend fun createSignerInfo(sender: Wallet): SignerInfo {
+        val key = sender.key ?: throw IllegalArgumentException("Wallet must have a key")
+        val sequence = accountInfoProvider.get(sender.address.text)?.sequence ?: 0u
+
+        return SignerInfo(
+            PubKey(key.publicKey).toAny(),
+            ModeInfo(ModeInfo.SumOneOf.Single(ModeInfo.Single(SignMode.SIGN_MODE_UNSPECIFIED))),
+            sequence,
         )
     }
 }

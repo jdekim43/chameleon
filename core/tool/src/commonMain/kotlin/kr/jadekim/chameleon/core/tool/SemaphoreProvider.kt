@@ -3,7 +3,7 @@ package kr.jadekim.chameleon.core.tool
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
-import kr.jadekim.chameleon.core.tool.broadcaster.BroadcastEventHandler
+import kr.jadekim.chameleon.core.tool.broadcaster.BroadcastEventHook
 import kr.jadekim.chameleon.core.wallet.Address
 import kr.jadekim.chameleon.core.wallet.Wallet
 
@@ -18,15 +18,15 @@ interface SemaphoreProvider {
     suspend fun release(keys: List<String>)
 }
 
-open class TransactionSenderLockHandler<Transaction : Any, TransactionResult : Any>(
+open class TransactionSenderLockHook<Transaction : Any, TransactionResult : Any>(
     private val semaphore: SemaphoreProvider,
-) : BroadcastEventHandler<Transaction, TransactionResult> {
+) : BroadcastEventHook<Transaction, TransactionResult> {
 
     override suspend fun onStart(chainId: String, sender: Wallet, transaction: Transaction) {
         semaphore.acquire(key(chainId, sender))
     }
 
-    override suspend fun onFinish(
+    override suspend fun onSucceed(
         chainId: String,
         sender: Wallet,
         transaction: Transaction,
