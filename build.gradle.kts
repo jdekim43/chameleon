@@ -155,6 +155,16 @@ jreleaser {
     }
 }
 
+val jreleaserFullRelease = tasks.named("jreleaserFullRelease") {
+    afterEvaluate {
+        layout.buildDirectory.dir("staging-deploy").get().asFile.delete()
+
+        subprojects.forEach {
+            it.layout.buildDirectory.dir("staging-deploy").get().asFile.delete()
+        }
+    }
+}
+
 tasks.named("publish") {
     beforeEvaluate {
         layout.buildDirectory.dir("staging-deploy").get().asFile.delete()
@@ -167,5 +177,5 @@ tasks.named("publish") {
         dependsOn(":${it.path}:publish")
     }
 
-    finalizedBy(":jreleaserFullRelease")
+    finalizedBy(jreleaserFullRelease)
 }
