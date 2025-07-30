@@ -61,7 +61,9 @@ fun JvmType.toCompatibleType() = BigDecimal(this)
 
 fun BigDecimal.toPlatformType() = origin
 
-actual fun BigDecimal.ceil(): BigDecimal = origin.setScale(0, RoundingMode.CEILING).toCompatibleType()
+actual fun BigDecimal.ceil(scale: Int): BigDecimal = origin.setScale(scale, RoundingMode.CEILING).toCompatibleType()
+
+actual fun BigDecimal.roundUp(scale: Int): BigDecimal = origin.setScale(scale, RoundingMode.UP).toCompatibleType()
 
 actual fun BigDecimal.toBigInteger(): BigInteger = origin.toBigInteger().toCompatibleType()
 

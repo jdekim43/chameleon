@@ -1,4 +1,4 @@
-package kr.jadekim.chameleon.initia
+package kr.jadekim.chameleon.inertia
 
 import cosmos.tx.v1beta1.Tx
 import kr.jadekim.chameleon.core.tool.SemaphoreProvider
@@ -10,7 +10,7 @@ import kr.jadekim.chameleon.initia.wallet.InitiaWallet
 import kr.jadekim.protobuf.type.ProtobufServiceClient
 import kr.jadekim.protobuf.type.ProtobufServiceClientOption
 
-data class InitiaOptions<ClientOption : ProtobufServiceClientOption>(
+data class InertiaOptions<ClientOption : ProtobufServiceClientOption>(
     val chainId: String,
     val client: CosmosClient<ClientOption>,
     val accountInfoProvider: AccountInfoProvider? = client.accountInfoProvider(),
@@ -34,18 +34,18 @@ data class InitiaOptions<ClientOption : ProtobufServiceClientOption>(
     ),
 )
 
-class Initia<ClientOption : ProtobufServiceClientOption>(
+class Inertia<ClientOption : ProtobufServiceClientOption>(
     val chainId: String,
     val broadcaster: CosmosBroadcaster,
     val client: ProtobufServiceClient<ClientOption>,
 ) {
 
-    constructor(options: InitiaOptions<ClientOption>) : this(options.chainId, options.broadcaster, options.client)
+    constructor(options: InertiaOptions<ClientOption>) : this(options.chainId, options.broadcaster, options.client)
 
     fun broadcast(transaction: Tx, sender: InitiaWallet) = broadcaster.broadcast(transaction, sender)
 
     fun broadcast(
         sender: InitiaWallet,
-        buildTransaction: InitiaTransactionBuilder.() -> Unit,
-    ) = broadcast(InitiaTransactionBuilder().apply(buildTransaction).build(), sender)
+        buildTransaction: InertiaTransactionBuilder.() -> Unit,
+    ) = broadcast(InertiaTransactionBuilder().apply(buildTransaction).build(), sender)
 }

@@ -10,6 +10,7 @@ kotlin {
             dependencies {
                 val chameleonProtoBuildVersion: String by project
                 val seiCosmosSdkVersion: String by project
+                val cosmosIbcVersion: String by project
                 val cosmwasmWasmdVersion: String by project
                 val seiVersion: String by project
 
@@ -17,6 +18,7 @@ kotlin {
                     exclude("kr.jadekim", "chameleon-proto-cosmos-sdk")
                 }
                 api("kr.jadekim:chameleon-proto-sei-cosmos:$seiCosmosSdkVersion-$chameleonProtoBuildVersion")
+                api("kr.jadekim:chameleon-proto-cosmos-ibc:$cosmosIbcVersion-$chameleonProtoBuildVersion")
                 api("kr.jadekim:chameleon-proto-cosmwasm-wasmd:$cosmwasmWasmdVersion-$chameleonProtoBuildVersion")
                 api("kr.jadekim:chameleon-proto-sei-chain:$seiVersion-$chameleonProtoBuildVersion")
             }

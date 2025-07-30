@@ -1,12 +1,15 @@
+import org.jreleaser.model.Active
+import org.jreleaser.model.Signing
+
 plugins {
-    kotlin("multiplatform") version "2.0.21"
-    id("org.jetbrains.dokka") version "1.9.20"
+    kotlin("multiplatform") version "2.1.21"
+    id("org.jetbrains.dokka") version "2.0.0"
     id("maven-publish")
-    id("signing")
+    id("org.jreleaser") version "1.18.0"
 }
 
 group = "kr.jadekim"
-version = "0.4.3"
+version = "0.4.7"
 
 allprojects {
     repositories {
@@ -20,7 +23,6 @@ configure(allprojects.filter { !it.hasProperty("IGNORE_GLOBAL_CONFIGURATION") })
         plugin("kotlin-multiplatform")
         plugin("org.jetbrains.dokka")
         plugin("maven-publish")
-        plugin("signing")
     }
 
     kotlin {
@@ -88,38 +90,10 @@ configure(allprojects.filter { !it.hasProperty("IGNORE_GLOBAL_CONFIGURATION") })
         }
 
         repositories {
-            val ossrhUsername: String by project
-            val ossrhPassword: String by project
-
-            if (version.toString().endsWith("-SNAPSHOT", true)) {
-                maven {
-                    name = "mavenCentralSnapshot"
-                    setUrl("https://s01.oss.sonatype.org/content/repositories/snapshots/")
-                    credentials {
-                        username = ossrhUsername
-                        password = ossrhPassword
-                    }
-                }
-            } else {
-                maven {
-                    name = "mavenCentral"
-                    setUrl("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
-                    credentials {
-                        username = ossrhUsername
-                        password = ossrhPassword
-                    }
-                }
+            maven {
+                setUrl(layout.buildDirectory.dir("staging-deploy"))
             }
         }
-    }
-
-    signing {
-        sign(publishing.publications)
-    }
-
-    val signingTasks = tasks.withType<Sign>()
-    tasks.withType<AbstractPublishToMaven>().configureEach {
-        mustRunAfter(signingTasks)
     }
 }
 
@@ -128,6 +102,63 @@ subprojects {
     version = rootProject.version
 }
 
-tasks.withType<AbstractPublishToMaven> {
-    enabled = false
+jreleaser {
+    project {
+        author("Jade Kim")
+        license.set("Apache-2.0")
+        links {
+            vcsBrowser.set("https://github.com/jdekim43/chameleon")
+        }
+        inceptionYear.set("2021")
+    }
+
+    signing {
+        active.set(Active.ALWAYS)
+        armored.set(true)
+        mode.set(Signing.Mode.FILE)
+    }
+
+    deploy {
+        maven {
+            mavenCentral {
+                create("release") {
+                    active.set(Active.RELEASE)
+                    url.set("https://central.sonatype.com/api/v1/publisher")
+
+                    subprojects.forEach {
+                        stagingRepository(it.layout.buildDirectory.dir("staging-deploy").get().asFile.absolutePath)
+                    }
+                }
+            }
+            nexus2 {
+                create("snapshot") {
+                    active.set(Active.SNAPSHOT)
+                    url.set("https://central.sonatype.com/repository/maven-snapshots")
+                    snapshotUrl.set("https://central.sonatype.com/repository/maven-snapshots")
+                    applyMavenCentralRules.set(true)
+                    snapshotSupported.set(true)
+                    closeRepository.set(true)
+                    releaseRepository.set(true)
+
+                    subprojects.forEach {
+                        stagingRepository(it.layout.buildDirectory.dir("staging-deploy").get().asFile.absolutePath)
+                    }
+                }
+            }
+        }
+    }
+
+    release {
+        github {
+            repoOwner = "jdekim43"
+        }
+    }
+}
+
+tasks.named("publish") {
+    subprojects.forEach {
+        dependsOn(":${it.path}:publish")
+    }
+
+    finalizedBy(":jreleaserFullRelease")
 }

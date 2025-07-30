@@ -27,6 +27,8 @@ include(
     ":initia",
     ":initia:type",
     ":initia:wallet",
+    ":inertia",
+    ":inertia:type"
 )
 
 fun ProjectDescriptor.renameChildren() {

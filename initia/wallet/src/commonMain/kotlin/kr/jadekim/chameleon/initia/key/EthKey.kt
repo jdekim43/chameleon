@@ -1,37 +1,36 @@
-package kr.jadekim.chameleon.injective.key
+package kr.jadekim.chameleon.initia.key
 
 import kotlinx.coroutines.Deferred
 import kr.jadekim.chameleon.core.crypto.*
 import kr.jadekim.chameleon.cosmos.key.BaseCosmosMnemonicKey
-import kr.jadekim.chameleon.cosmos.key.Ed25519PublicKey
 import kr.jadekim.chameleon.cosmos.key.Secp256k1KeyPair
 import kr.jadekim.chameleon.cosmos.key.Secp256k1PublicKey
 import kr.jadekim.common.extension.toFixed
 
-const val INJECTIVE_KEY_SIZE = 33
+const val INITIA_ETH_KEY_SIZE = 33
 
-internal fun ByteArray.toFixedKeySize() = toFixed(INJECTIVE_KEY_SIZE)
+internal fun ByteArray.toFixedEthKeySize() = toFixed(INITIA_ETH_KEY_SIZE)
 
-open class InjectivePublicKey(publicKey: ByteArray) : Secp256k1PublicKey {
+open class InitiaEthPublicKey(publicKey: ByteArray) : Secp256k1PublicKey {
 
-    override val publicKey: ByteArray = publicKey.toFixedKeySize()
+    override val publicKey: ByteArray = publicKey.toFixedEthKeySize()
 
     override fun verify(message: ByteArray, signature: ByteArray): Boolean {
         return Bip32.verify(Keccak256.hash(message), publicKey, signature)
     }
 }
 
-open class InjectiveKeyPair private constructor(
+open class InitiaEthKeyPair private constructor(
     override val privateKey: ByteArray,
     override val publicKey: ByteArray,
     unit: Unit, //avoid jvm duplicate signature
-) : Secp256k1KeyPair, InjectivePublicKey(publicKey) {
+) : Secp256k1KeyPair, InitiaEthPublicKey(publicKey) {
 
     internal constructor(keyPair: Bip32KeyPair) : this(keyPair.privateKey, keyPair.publicKey)
 
     constructor(privateKey: ByteArray, publicKey: ByteArray? = null) : this(
-        privateKey.toFixedKeySize(),
-        publicKey?.toFixedKeySize() ?: Bip32.keyPair(privateKey.toFixedKeySize()).publicKey,
+        privateKey.toFixedEthKeySize(),
+        publicKey?.toFixedEthKeySize() ?: Bip32.keyPair(privateKey.toFixedEthKeySize()).publicKey,
         Unit,
     )
 
@@ -40,14 +39,14 @@ open class InjectiveKeyPair private constructor(
     override fun sign(message: ByteArray): Deferred<ByteArray> = super<Secp256k1KeyPair>.sign(message)
 }
 
-open class InjectiveMnemonicKey private constructor(
+open class InitiaEthMnemonicKey private constructor(
     override val mnemonic: String,
     override val coinType: Int,
     override val account: Int,
     override val index: Int,
     override val passphrase: String?,
     bip32KeyPair: Bip32KeyPair,
-) : BaseCosmosMnemonicKey, InjectiveKeyPair(bip32KeyPair) {
+) : BaseCosmosMnemonicKey, InitiaEthKeyPair(bip32KeyPair) {
 
     override val change = CHANGE
 
@@ -75,14 +74,7 @@ open class InjectiveMnemonicKey private constructor(
             account: Int = 0,
             index: Int = 0,
             passphrase: String? = null,
-        ) = InjectiveMnemonicKey(Mnemonic.generate(), coinType, account, index, passphrase)
+        ) = InitiaEthMnemonicKey(Mnemonic.generate(), coinType, account, index, passphrase)
     }
 }
 
-open class InjectiveConsensusPublicKey(override val publicKey: ByteArray) : Ed25519PublicKey {
-
-    @Deprecated("Not yet implemented")
-    override fun verify(message: ByteArray, signature: ByteArray): Boolean {
-        TODO("Not yet implemented")
-    }
-}

@@ -1,11 +1,30 @@
 package kr.jadekim.chameleon.initia.wallet
 
 import kr.jadekim.chameleon.core.crypto.Bech32
+import kr.jadekim.chameleon.core.crypto.Bip32
+import kr.jadekim.chameleon.core.crypto.Keccak256
 import kr.jadekim.chameleon.cosmos.key.Ed25519PublicKey
 import kr.jadekim.chameleon.cosmos.key.Secp256k1PublicKey
-import kr.jadekim.chameleon.cosmos.key.toAddress
 import kr.jadekim.chameleon.cosmos.wallet.Bech32Address
+import kr.jadekim.chameleon.initia.key.InitiaEthPublicKey
 import kr.jadekim.common.encoder.HEX
+import kr.jadekim.common.encoder.encodeHex
+import kr.jadekim.chameleon.cosmos.key.toAddress as toCosmosBasedAddress
+
+private fun Secp256k1PublicKey.toEtherBasedAddress(): ByteArray {
+    val uncompressedPublicKey = Bip32.decompressPublicKey(publicKey)
+    val hashed = Keccak256.hash(uncompressedPublicKey.sliceArray(1 until uncompressedPublicKey.size))
+
+    return hashed.sliceArray(hashed.size - 20 until hashed.size)
+}
+
+private fun Secp256k1PublicKey.toAddress(): ByteArray {
+    if (this is InitiaEthPublicKey) {
+        return toEtherBasedAddress()
+    }
+
+    return toCosmosBasedAddress()
+}
 
 @JvmInline
 value class InitiaAddress(override val text: String) : Bech32Address<InitiaAddress.Hrp> {
@@ -47,7 +66,7 @@ value class InitiaAddress(override val text: String) : Bech32Address<InitiaAddre
         fun createConsensusAddress(publicKey: Ed25519PublicKey): InitiaAddress = InitiaAddress(
             Bech32.encode(
                 Hrp.CONSENSUS_NODE.value,
-                publicKey.toAddress()
+                publicKey.toCosmosBasedAddress(),
             )
         )
 
@@ -68,6 +87,9 @@ value class InitiaAddress(override val text: String) : Bech32Address<InitiaAddre
             false
         }
     }
+
+    val ethereumAddress: String
+        get() = "0x${data.encodeHex()}"
 
     override fun parseHrp(text: String): Hrp = Hrp.fromHrp(text)
         ?: throw IllegalArgumentException("Unknown bech32 hrp for initia address")

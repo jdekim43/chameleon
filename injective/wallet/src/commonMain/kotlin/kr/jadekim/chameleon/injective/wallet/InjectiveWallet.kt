@@ -12,8 +12,13 @@ class InjectiveWallet(override val address: InjectiveAddress, override val key: 
 
         @JvmStatic
         @JvmOverloads
-        fun create(index: Int = 0, passphrase: String? = null): Pair<InjectiveWallet, InjectiveMnemonicKey> {
-            val key = InjectiveMnemonicKey.create(index, passphrase)
+        fun create(
+            coinType: Int = InjectiveMnemonicKey.COIN_TYPE,
+            account: Int = 0,
+            index: Int = 0,
+            passphrase: String? = null,
+        ): Pair<InjectiveWallet, InjectiveMnemonicKey> {
+            val key = InjectiveMnemonicKey.create(coinType, account, index, passphrase)
 
             return InjectiveWallet(key) to key
         }
@@ -22,9 +27,10 @@ class InjectiveWallet(override val address: InjectiveAddress, override val key: 
         @JvmOverloads
         fun fromMnemonic(
             mnemonic: String,
+            coinType: Int = InjectiveMnemonicKey.COIN_TYPE, account: Int = 0,
             index: Int = 0,
             passphrase: String? = null,
-        ) = InjectiveWallet(InjectiveMnemonicKey(mnemonic, index, passphrase))
+        ) = InjectiveWallet(InjectiveMnemonicKey(mnemonic, coinType, account, index, passphrase))
 
         @JvmStatic
         @JvmOverloads

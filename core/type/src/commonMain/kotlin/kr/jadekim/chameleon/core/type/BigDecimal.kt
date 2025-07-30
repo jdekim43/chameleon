@@ -28,7 +28,9 @@ expect class BigDecimal(value: String) : Number, Comparable<BigDecimal> {
     operator fun rem(other: BigInteger): BigDecimal
 }
 
-expect fun BigDecimal.ceil(): BigDecimal
+expect fun BigDecimal.ceil(scale: Int = 0): BigDecimal
+
+expect fun BigDecimal.roundUp(scale: Int = 0): BigDecimal
 
 expect fun BigDecimal.toBigInteger(): BigInteger
 

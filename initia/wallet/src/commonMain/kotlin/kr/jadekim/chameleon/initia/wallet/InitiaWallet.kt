@@ -3,7 +3,6 @@ package kr.jadekim.chameleon.initia.wallet
 import kr.jadekim.chameleon.core.wallet.Wallet
 import kr.jadekim.chameleon.initia.key.InitiaKeyPair
 import kr.jadekim.chameleon.initia.key.InitiaMnemonicKey
-import kr.jadekim.chameleon.initia.key.InitiaMnemonicKey.Companion.COIN_TYPE
 import kr.jadekim.chameleon.initia.key.InitiaPublicKey
 import kr.jadekim.common.encoder.decodeHex
 
@@ -14,7 +13,7 @@ class InitiaWallet(override val address: InitiaAddress, override val key: Initia
         @JvmStatic
         @JvmOverloads
         fun create(
-            coinType: Int = COIN_TYPE,
+            coinType: Int = InitiaMnemonicKey.COIN_TYPE,
             account: Int = 0,
             index: Int = 0,
             passphrase: String? = null,
@@ -28,7 +27,7 @@ class InitiaWallet(override val address: InitiaAddress, override val key: Initia
         @JvmOverloads
         fun fromMnemonic(
             mnemonic: String,
-            coinType: Int = COIN_TYPE,
+            coinType: Int = InitiaMnemonicKey.COIN_TYPE,
             account: Int = 0,
             index: Int = 0,
             passphrase: String? = null,

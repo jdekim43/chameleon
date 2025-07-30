@@ -18,7 +18,7 @@ data class CosmosFee(
         granter: String = payer,
     ) : this(
         gasAmount,
-        listOf((gasPrice * gasAmount.toBigInteger()).toCoin() + BigInteger.ONE),
+        listOf(Coin(gasPrice.denomination, (gasPrice.amount * gasAmount.toBigInteger()).roundUp().toBigInteger())),
         payer,
         granter,
     )

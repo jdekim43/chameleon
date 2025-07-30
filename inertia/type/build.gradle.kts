@@ -12,8 +12,9 @@ kotlin {
                 val cosmosSdkVersion: String by project
                 val cosmosIbcVersion: String by project
                 val cosmwasmWasmdVersion: String by project
-                val terraAllianceVersion: String by project
-                val terraCoreVersion: String by project
+                val skipConnectVersion: String by project
+                val initiaOpinitVersion: String by project
+                val inertiaVersion: String by project
 
                 api(project(":chameleon-cosmos:chameleon-cosmos-type")) {
                     exclude("kr.jadekim", "chameleon-proto-cosmos-sdk")
@@ -21,8 +22,9 @@ kotlin {
                 api("kr.jadekim:chameleon-proto-cosmos-sdk:$cosmosSdkVersion-$chameleonProtoBuildVersion")
                 api("kr.jadekim:chameleon-proto-cosmos-ibc:$cosmosIbcVersion-$chameleonProtoBuildVersion")
                 api("kr.jadekim:chameleon-proto-cosmwasm-wasmd:$cosmwasmWasmdVersion-$chameleonProtoBuildVersion")
-                api("kr.jadekim:chameleon-proto-terra-alliance:$terraAllianceVersion-$chameleonProtoBuildVersion")
-                api("kr.jadekim:chameleon-proto-terra-core:$terraCoreVersion-$chameleonProtoBuildVersion")
+                api("kr.jadekim:chameleon-proto-skip-connect:$skipConnectVersion-$chameleonProtoBuildVersion")
+                api("kr.jadekim:chameleon-proto-initia-opinit:$initiaOpinitVersion-$chameleonProtoBuildVersion")
+                api("kr.jadekim:chameleon-proto-inertia:$inertiaVersion-$chameleonProtoBuildVersion")
             }
         }
 
