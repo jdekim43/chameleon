@@ -166,13 +166,6 @@ val jreleaserFullRelease = tasks.named("jreleaserFullRelease") {
 }
 
 tasks.named("publish") {
-    beforeEvaluate {
-        layout.buildDirectory.dir("staging-deploy").get().asFile.delete()
-
-        subprojects.forEach {
-            it.layout.buildDirectory.dir("staging-deploy").get().asFile.delete()
-        }
-    }
     subprojects.forEach {
         dependsOn(":${it.path}:publish")
     }
