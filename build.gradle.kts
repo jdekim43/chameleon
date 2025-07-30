@@ -156,7 +156,7 @@ jreleaser {
 }
 
 val jreleaserFullRelease = tasks.named("jreleaserFullRelease") {
-    afterEvaluate {
+    doLast {
         layout.buildDirectory.dir("staging-deploy").get().asFile.delete()
 
         subprojects.forEach {
