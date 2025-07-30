@@ -9,7 +9,7 @@ plugins {
 }
 
 group = "kr.jadekim"
-version = "0.4.7"
+version = "0.4.8"
 
 allprojects {
     repositories {
