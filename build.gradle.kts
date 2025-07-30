@@ -9,7 +9,7 @@ plugins {
 }
 
 group = "kr.jadekim"
-version = "0.4.8"
+version = "0.4.9"
 
 allprojects {
     repositories {
@@ -156,6 +156,13 @@ jreleaser {
 }
 
 tasks.named("publish") {
+    beforeEvaluate {
+        layout.buildDirectory.dir("staging-deploy").get().asFile.delete()
+
+        subprojects.forEach {
+            it.layout.buildDirectory.dir("staging-deploy").get().asFile.delete()
+        }
+    }
     subprojects.forEach {
         dependsOn(":${it.path}:publish")
     }

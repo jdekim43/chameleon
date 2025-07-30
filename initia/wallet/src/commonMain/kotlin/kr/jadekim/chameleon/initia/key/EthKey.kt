@@ -11,7 +11,7 @@ const val INITIA_ETH_KEY_SIZE = 33
 
 internal fun ByteArray.toFixedEthKeySize() = toFixed(INITIA_ETH_KEY_SIZE)
 
-open class InitiaEthPublicKey(publicKey: ByteArray) : Secp256k1PublicKey {
+open class InitiaEthPublicKey(publicKey: ByteArray) : Secp256k1PublicKey, InitiaPublicKey {
 
     override val publicKey: ByteArray = publicKey.toFixedEthKeySize()
 
@@ -24,7 +24,7 @@ open class InitiaEthKeyPair private constructor(
     override val privateKey: ByteArray,
     override val publicKey: ByteArray,
     unit: Unit, //avoid jvm duplicate signature
-) : Secp256k1KeyPair, InitiaEthPublicKey(publicKey) {
+) : Secp256k1KeyPair, InitiaEthPublicKey(publicKey), InitiaKeyPair {
 
     internal constructor(keyPair: Bip32KeyPair) : this(keyPair.privateKey, keyPair.publicKey)
 
@@ -46,7 +46,7 @@ open class InitiaEthMnemonicKey private constructor(
     override val index: Int,
     override val passphrase: String?,
     bip32KeyPair: Bip32KeyPair,
-) : BaseCosmosMnemonicKey, InitiaEthKeyPair(bip32KeyPair) {
+) : BaseCosmosMnemonicKey, InitiaEthKeyPair(bip32KeyPair), InitiaMnemonicKey {
 
     override val change = CHANGE
 

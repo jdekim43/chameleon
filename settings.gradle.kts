@@ -27,6 +27,7 @@ include(
     ":initia",
     ":initia:type",
     ":initia:wallet",
+    ":initia:tool",
     ":inertia",
     ":inertia:type"
 )

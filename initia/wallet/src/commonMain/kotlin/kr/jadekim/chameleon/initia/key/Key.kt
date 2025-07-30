@@ -1,12 +1,15 @@
 package kr.jadekim.chameleon.initia.key
 
+import kr.jadekim.chameleon.cosmos.key.BaseCosmosMnemonicKey
 import kr.jadekim.chameleon.cosmos.key.Ed25519PublicKey
+import kr.jadekim.chameleon.cosmos.key.Secp256k1KeyPair
+import kr.jadekim.chameleon.cosmos.key.Secp256k1PublicKey
 
-typealias InitiaPublicKey = InitiaEthPublicKey
+interface InitiaPublicKey : Secp256k1PublicKey
 
-typealias InitiaKeyPair = InitiaEthKeyPair
+interface InitiaKeyPair : Secp256k1KeyPair
 
-typealias InitiaMnemonicKey = InitiaEthMnemonicKey
+interface InitiaMnemonicKey : BaseCosmosMnemonicKey
 
 open class InitiaConsensusPublicKey(override val publicKey: ByteArray) : Ed25519PublicKey {
 
