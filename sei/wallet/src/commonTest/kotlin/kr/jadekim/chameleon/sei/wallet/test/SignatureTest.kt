@@ -1,7 +1,7 @@
 package kr.jadekim.chameleon.sei.wallet.test
 
 import kr.jadekim.chameleon.cosmos.key.CosmosPublicKey
-import kr.jadekim.chameleon.sei.key.SeiKeyPair
+import kr.jadekim.chameleon.sei.key.SeiSecp256k1KeyPair
 import kr.jadekim.chameleon.sei.wallet.SeiWallet
 import kr.jadekim.common.encoder.decodeBase64
 import kr.jadekim.common.encoder.encodeBase64
@@ -15,7 +15,7 @@ class SignatureTest {
     @Test
     fun succeedSign() {
         val wallet = SeiWallet.fromKeyPair(NORMAL.privateKeyHex)
-        val signature = (wallet.key as SeiKeyPair).signSync("text")
+        val signature = (wallet.key as SeiSecp256k1KeyPair).signSync("text")
         assertEquals(
             "wzShM5fvNKxukZIgVF2uO/f+VNRabi7Xf+TC3pJN2OdIeHM6ClihLFIu3synzy0eXQ/bLz9PMfGS+fLI7cCDTQ==",
             signature.encodeBase64(),

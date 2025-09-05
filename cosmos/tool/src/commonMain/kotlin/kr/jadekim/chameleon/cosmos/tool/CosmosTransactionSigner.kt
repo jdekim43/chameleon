@@ -10,6 +10,7 @@ import cosmos.tx.v1beta1.SignerInfo
 import cosmos.tx.v1beta1.Tx
 import cosmos.tx.v1beta1.TxBodyConverter.toByteArray
 import kr.jadekim.chameleon.core.key.Key
+import kr.jadekim.chameleon.core.key.SignableKey
 import kr.jadekim.chameleon.core.tool.TransactionSigner
 import kr.jadekim.chameleon.core.wallet.Wallet
 import kr.jadekim.chameleon.cosmos.wallet.CosmosWallet
@@ -38,7 +39,7 @@ open class CosmosTransactionDirectSigner(
     ): Tx = sign(transaction, wallet, chainId).second
 
     suspend fun sign(transaction: Tx, wallet: Wallet, chainId: String): Pair<CosmosSignature, Tx> {
-        val key = wallet.key ?: throw IllegalArgumentException("Wallet must have a key")
+        val key = wallet.key as? SignableKey ?: throw IllegalArgumentException("Wallet is not a signable key")
         var signerInfo = transaction.authInfo.signerInfos.findByAddress(wallet.address.text)
         val isProvidedSignerInfo = signerInfo != null
         val accountInfo = accountInfoProvider.get(wallet.address.text) ?: AccountInfo(wallet)

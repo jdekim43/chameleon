@@ -1,25 +1,21 @@
-package kr.jadekim.chameleon.sei.key
+package kr.jadekim.chameleon.cosmos.key
 
 import kr.jadekim.chameleon.core.crypto.Bip32
 import kr.jadekim.chameleon.core.crypto.Bip32KeyPair
 import kr.jadekim.chameleon.core.crypto.Bip44
 import kr.jadekim.chameleon.core.crypto.Mnemonic
 import kr.jadekim.chameleon.core.key.BIP44MnemonicKey
-import kr.jadekim.chameleon.cosmos.key.Ed25519PublicKey
-import kr.jadekim.chameleon.cosmos.key.Secp256k1KeyPair
-import kr.jadekim.chameleon.cosmos.key.Secp256k1PublicKey
-import kr.jadekim.chameleon.cosmos.key.truncateAsCosmosKeySize
 
-open class SeiSecp256k1PublicKey(publicKey: ByteArray) : Secp256k1PublicKey {
+open class CosmosSecp256k1PublicKey(publicKey: ByteArray) : Secp256k1PublicKey {
 
     override val publicKey: ByteArray = publicKey.truncateAsCosmosKeySize()
 }
 
-open class SeiSecp256k1KeyPair private constructor(
+open class CosmosSecp256k1KeyPair(
     privateKey: ByteArray,
     publicKey: ByteArray,
     unit: Unit, //avoid jvm duplicate signature
-) : Secp256k1KeyPair, SeiSecp256k1PublicKey(publicKey) {
+) : Secp256k1KeyPair, CosmosSecp256k1PublicKey(publicKey) {
 
     override val privateKey: ByteArray = privateKey.truncateAsCosmosKeySize()
 
@@ -31,14 +27,14 @@ open class SeiSecp256k1KeyPair private constructor(
     internal constructor(keyPair: Bip32KeyPair) : this(keyPair.privateKey, keyPair.publicKey)
 }
 
-open class SeiMnemonicKey private constructor(
+open class CosmosMnemonicKey private constructor(
     override val mnemonic: String,
     override val coinType: Int = COIN_TYPE,
     override val account: Int = 0,
     override val index: Int = 0,
     override val passphrase: String? = null,
     bip32KeyPair: Bip32KeyPair,
-) : BIP44MnemonicKey, SeiSecp256k1KeyPair(bip32KeyPair) {
+) : BIP44MnemonicKey, CosmosSecp256k1KeyPair(bip32KeyPair) {
 
     override val change = CHANGE
 
@@ -66,8 +62,8 @@ open class SeiMnemonicKey private constructor(
             account: Int = 0,
             index: Int = 0,
             passphrase: String? = null,
-        ) = SeiMnemonicKey(Mnemonic.generate(), coinType, account, index, passphrase)
+        ) = CosmosMnemonicKey(Mnemonic.generate(), coinType, account, index, passphrase)
     }
 }
 
-open class SeiEd25519PublicKey(override val publicKey: ByteArray) : Ed25519PublicKey
+open class CosmosEd25519PublicKey(override val publicKey: ByteArray) : Ed25519PublicKey

@@ -1,10 +1,8 @@
 package kr.jadekim.chameleon.terra.wallet
 
 import kr.jadekim.chameleon.core.crypto.Bech32
-import kr.jadekim.chameleon.cosmos.key.Ed25519PublicKey
-import kr.jadekim.chameleon.cosmos.key.Secp256k1PublicKey
-import kr.jadekim.chameleon.cosmos.key.toAddress
-import kr.jadekim.chameleon.cosmos.wallet.Bech32Address
+import kr.jadekim.chameleon.core.key.Key
+import kr.jadekim.chameleon.core.wallet.Bech32Address
 import kr.jadekim.common.encoder.HEX
 
 @JvmInline
@@ -28,35 +26,21 @@ value class TerraAddress(override val text: String) : Bech32Address<TerraAddress
     companion object {
 
         @JvmStatic
-        fun createAccountAddress(publicKey: Secp256k1PublicKey): TerraAddress = TerraAddress(
-            Bech32.encode(
-                Hrp.ACCOUNT.value,
-                Bech32.toWords(publicKey.toAddress()),
-            ),
+        fun createAccountAddress(key: Key): TerraAddress = TerraAddress(
+            Bech32.encode(Hrp.ACCOUNT.value, Bech32.toWords(key.address)),
         )
 
         @JvmStatic
-        fun createAccountPublicKeyAddress(publicKey: Secp256k1PublicKey): TerraAddress = TerraAddress(
+        fun createAccountPublicKeyAddress(key: Key): TerraAddress = TerraAddress(
             Bech32.encode(
                 TerraAddress.Hrp.ACCOUNT_PUBLIC_KEY.value,
-                Bech32.toWords(HEX.decode("eb5ae98721") + publicKey.publicKey),
+                Bech32.toWords(HEX.decode("eb5ae98721") + key.publicKey),
             )
         )
 
         @JvmStatic
-        fun createConsensusAddress(publicKey: Ed25519PublicKey): TerraAddress = TerraAddress(
-            Bech32.encode(
-                Hrp.CONSENSUS_NODE.value,
-                publicKey.toAddress(),
-            ),
-        )
-
-        @JvmStatic
-        fun createConsensusAddress(bytes: ByteArray): TerraAddress = TerraAddress(
-            Bech32.encode(
-                Hrp.CONSENSUS_NODE.value,
-                Bech32.toWords(bytes),
-            )
+        fun createConsensusAddress(key: Key): TerraAddress = TerraAddress(
+            Bech32.encode(Hrp.CONSENSUS_NODE.value, Bech32.toWords(key.address)),
         )
 
         @JvmStatic

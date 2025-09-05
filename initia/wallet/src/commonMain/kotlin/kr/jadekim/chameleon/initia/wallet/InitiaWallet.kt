@@ -1,22 +1,26 @@
 package kr.jadekim.chameleon.initia.wallet
 
+import kr.jadekim.chameleon.core.key.Key
 import kr.jadekim.chameleon.core.wallet.Wallet
-import kr.jadekim.chameleon.initia.key.*
+import kr.jadekim.chameleon.initia.key.InitiaCosmosMnemonicKey
+import kr.jadekim.chameleon.initia.key.InitiaCosmosSecp256k1KeyPair
+import kr.jadekim.chameleon.initia.key.InitiaEtherMnemonicKey
+import kr.jadekim.chameleon.initia.key.InitiaEtherSecp256k1KeyPair
 import kr.jadekim.common.encoder.decodeHex
 
-class InitiaWallet(override val address: InitiaAddress, override val key: InitiaPublicKey? = null) : Wallet {
+class InitiaWallet(override val address: InitiaAddress, override val key: Key? = null) : Wallet {
 
     companion object {
 
         @JvmStatic
         @JvmOverloads
         fun createEtherKey(
-            coinType: Int = InitiaEthMnemonicKey.COIN_TYPE,
+            coinType: Int = InitiaEtherMnemonicKey.COIN_TYPE,
             account: Int = 0,
             index: Int = 0,
             passphrase: String? = null,
-        ): Pair<InitiaWallet, InitiaMnemonicKey> {
-            val key = InitiaEthMnemonicKey.create(coinType, account, index, passphrase)
+        ): Pair<InitiaWallet, InitiaEtherMnemonicKey> {
+            val key = InitiaEtherMnemonicKey.create(coinType, account, index, passphrase)
 
             return InitiaWallet(key) to key
         }
@@ -28,7 +32,7 @@ class InitiaWallet(override val address: InitiaAddress, override val key: Initia
             account: Int = 0,
             index: Int = 0,
             passphrase: String? = null,
-        ): Pair<InitiaWallet, InitiaMnemonicKey> {
+        ): Pair<InitiaWallet, InitiaCosmosMnemonicKey> {
             val key = InitiaCosmosMnemonicKey.create(coinType, account, index, passphrase)
 
             return InitiaWallet(key) to key
@@ -38,11 +42,11 @@ class InitiaWallet(override val address: InitiaAddress, override val key: Initia
         @JvmOverloads
         fun fromMnemonicWithEtherKey(
             mnemonic: String,
-            coinType: Int = InitiaEthMnemonicKey.COIN_TYPE,
+            coinType: Int = InitiaEtherMnemonicKey.COIN_TYPE,
             account: Int = 0,
             index: Int = 0,
             passphrase: String? = null,
-        ) = InitiaWallet(InitiaEthMnemonicKey(mnemonic, coinType, account, index, passphrase))
+        ) = InitiaWallet(InitiaEtherMnemonicKey(mnemonic, coinType, account, index, passphrase))
 
         @JvmStatic
         @JvmOverloads
@@ -59,29 +63,29 @@ class InitiaWallet(override val address: InitiaAddress, override val key: Initia
         fun fromEtherKeyPair(
             privateKey: ByteArray,
             publicKey: ByteArray? = null,
-        ) = InitiaWallet(InitiaEthKeyPair(privateKey, publicKey))
+        ) = InitiaWallet(InitiaEtherSecp256k1KeyPair(privateKey, publicKey))
 
         @JvmStatic
         @JvmOverloads
         fun fromCosmosKeyPair(
             privateKey: ByteArray,
             publicKey: ByteArray? = null,
-        ) = InitiaWallet(InitiaCosmosKeyPair(privateKey, publicKey))
+        ) = InitiaWallet(InitiaCosmosSecp256k1KeyPair(privateKey, publicKey))
 
         @JvmStatic
         @JvmOverloads
         fun fromEtherKeyPair(
             privateKey: String,
             publicKey: String? = null,
-        ) = InitiaWallet(InitiaEthKeyPair(privateKey.decodeHex(), publicKey?.decodeHex()))
+        ) = InitiaWallet(InitiaEtherSecp256k1KeyPair(privateKey.decodeHex(), publicKey?.decodeHex()))
 
         @JvmStatic
         @JvmOverloads
         fun fromCosmosKeyPair(
             privateKey: String,
             publicKey: String? = null,
-        ) = InitiaWallet(InitiaCosmosKeyPair(privateKey.decodeHex(), publicKey?.decodeHex()))
+        ) = InitiaWallet(InitiaCosmosSecp256k1KeyPair(privateKey.decodeHex(), publicKey?.decodeHex()))
     }
 
-    constructor(key: InitiaPublicKey) : this(InitiaAddress.createAccountAddress(key), key)
+    constructor(key: Key) : this(InitiaAddress.createAccountAddress(key), key)
 }

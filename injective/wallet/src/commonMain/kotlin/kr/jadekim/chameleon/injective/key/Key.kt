@@ -1,20 +1,26 @@
 package kr.jadekim.chameleon.injective.key
 
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
 import kr.jadekim.chameleon.core.crypto.*
-import kr.jadekim.chameleon.cosmos.key.BaseCosmosMnemonicKey
+import kr.jadekim.chameleon.core.key.BIP44MnemonicKey
+import kr.jadekim.chameleon.core.key.Key
+import kr.jadekim.chameleon.core.key.KeyPair
 import kr.jadekim.chameleon.cosmos.key.Ed25519PublicKey
-import kr.jadekim.chameleon.cosmos.key.Secp256k1KeyPair
-import kr.jadekim.chameleon.cosmos.key.Secp256k1PublicKey
-import kr.jadekim.common.extension.toFixed
+import kr.jadekim.chameleon.cosmos.key.truncateAsCosmosKeySize
+import kr.jadekim.common.extension.utf8
 
-const val INJECTIVE_KEY_SIZE = 33
+open class InjectivePublicKey(publicKey: ByteArray) : Key {
 
-internal fun ByteArray.toFixedKeySize() = toFixed(INJECTIVE_KEY_SIZE)
+    override val publicKey: ByteArray = publicKey.truncateAsCosmosKeySize()
 
-open class InjectivePublicKey(publicKey: ByteArray) : Secp256k1PublicKey {
+    override val address: ByteArray
+        get() {
+            val uncompressedPublicKey = Bip32.decompressPublicKey(publicKey)
+            val hashed = Keccak256.hash(uncompressedPublicKey.sliceArray(1 until uncompressedPublicKey.size))
 
-    override val publicKey: ByteArray = publicKey.toFixedKeySize()
+            return hashed.sliceArray(hashed.size - 20 until hashed.size)
+        }
 
     override fun verify(message: ByteArray, signature: ByteArray): Boolean {
         return Bip32.verify(Keccak256.hash(message), publicKey, signature)
@@ -22,32 +28,35 @@ open class InjectivePublicKey(publicKey: ByteArray) : Secp256k1PublicKey {
 }
 
 open class InjectiveKeyPair private constructor(
-    override val privateKey: ByteArray,
-    override val publicKey: ByteArray,
+    privateKey: ByteArray,
+    publicKey: ByteArray,
     unit: Unit, //avoid jvm duplicate signature
-) : Secp256k1KeyPair, InjectivePublicKey(publicKey) {
+) : KeyPair, InjectivePublicKey(publicKey) {
+
+    override val privateKey: ByteArray = privateKey.truncateAsCosmosKeySize()
+
+    constructor(
+        privateKey: ByteArray,
+        publicKey: ByteArray? = null,
+    ) : this(privateKey, publicKey ?: Bip32.keyPair(privateKey.truncateAsCosmosKeySize()).publicKey, Unit)
 
     internal constructor(keyPair: Bip32KeyPair) : this(keyPair.privateKey, keyPair.publicKey)
 
-    constructor(privateKey: ByteArray, publicKey: ByteArray? = null) : this(
-        privateKey.toFixedKeySize(),
-        publicKey?.toFixedKeySize() ?: Bip32.keyPair(privateKey.toFixedKeySize()).publicKey,
-        Unit,
-    )
+    fun signSync(message: ByteArray): ByteArray = Bip32.sign(Keccak256.hash(message), privateKey)
 
-    override fun signSync(message: ByteArray): ByteArray = Bip32.sign(Keccak256.hash(message), privateKey)
+    fun signSync(message: String): ByteArray = signSync(message.utf8())
 
-    override fun sign(message: ByteArray): Deferred<ByteArray> = super<Secp256k1KeyPair>.sign(message)
+    override fun sign(message: ByteArray): Deferred<ByteArray> = CompletableDeferred(signSync(message))
 }
 
 open class InjectiveMnemonicKey private constructor(
     override val mnemonic: String,
-    override val coinType: Int,
-    override val account: Int,
-    override val index: Int,
-    override val passphrase: String?,
+    override val coinType: Int = COIN_TYPE,
+    override val account: Int = 0,
+    override val index: Int = 0,
+    override val passphrase: String? = null,
     bip32KeyPair: Bip32KeyPair,
-) : BaseCosmosMnemonicKey, InjectiveKeyPair(bip32KeyPair) {
+) : BIP44MnemonicKey, InjectiveKeyPair(bip32KeyPair) {
 
     override val change = CHANGE
 
@@ -79,10 +88,4 @@ open class InjectiveMnemonicKey private constructor(
     }
 }
 
-open class InjectiveConsensusPublicKey(override val publicKey: ByteArray) : Ed25519PublicKey {
-
-    @Deprecated("Not yet implemented")
-    override fun verify(message: ByteArray, signature: ByteArray): Boolean {
-        TODO("Not yet implemented")
-    }
-}
+open class InitiaEd25519PublicKey(override val publicKey: ByteArray) : Ed25519PublicKey

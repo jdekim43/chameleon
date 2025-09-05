@@ -1,80 +1,73 @@
 package kr.jadekim.chameleon.terra.key
 
-import kotlinx.coroutines.Deferred
 import kr.jadekim.chameleon.core.crypto.Bip32
 import kr.jadekim.chameleon.core.crypto.Bip32KeyPair
 import kr.jadekim.chameleon.core.crypto.Bip44
 import kr.jadekim.chameleon.core.crypto.Mnemonic
-import kr.jadekim.chameleon.cosmos.key.Secp256k1KeyPair
-import kr.jadekim.chameleon.cosmos.key.BaseCosmosMnemonicKey
+import kr.jadekim.chameleon.core.key.BIP44MnemonicKey
 import kr.jadekim.chameleon.cosmos.key.Ed25519PublicKey
+import kr.jadekim.chameleon.cosmos.key.Secp256k1KeyPair
 import kr.jadekim.chameleon.cosmos.key.Secp256k1PublicKey
-import kr.jadekim.common.extension.toFixed
+import kr.jadekim.chameleon.cosmos.key.truncateAsCosmosKeySize
 
-const val TERRA_KEY_SIZE = 33
+open class TerraSecp256k1PublicKey(publicKey: ByteArray) : Secp256k1PublicKey {
 
-internal fun ByteArray.toFixedKeySize() = toFixed(TERRA_KEY_SIZE)
-
-open class TerraPublicKey(publicKey: ByteArray) : Secp256k1PublicKey {
-
-    override val publicKey: ByteArray = publicKey.toFixedKeySize()
+    override val publicKey: ByteArray = publicKey.truncateAsCosmosKeySize()
 }
 
-open class TerraKeyPair private constructor(
-    override val privateKey: ByteArray,
-    override val publicKey: ByteArray,
+open class TerraSecp256k1KeyPair private constructor(
+    privateKey: ByteArray,
+    publicKey: ByteArray,
     unit: Unit, //avoid jvm duplicate signature
-) : Secp256k1KeyPair, TerraPublicKey(publicKey) {
+) : Secp256k1KeyPair, TerraSecp256k1PublicKey(publicKey) {
+
+    override val privateKey: ByteArray = privateKey.truncateAsCosmosKeySize()
+
+    constructor(
+        privateKey: ByteArray,
+        publicKey: ByteArray? = null,
+    ) : this(privateKey, publicKey ?: Bip32.keyPair(privateKey.truncateAsCosmosKeySize()).publicKey, Unit)
 
     internal constructor(keyPair: Bip32KeyPair) : this(keyPair.privateKey, keyPair.publicKey)
-
-    constructor(privateKey: ByteArray, publicKey: ByteArray? = null) : this(
-        privateKey.toFixedKeySize(),
-        publicKey?.toFixedKeySize() ?: Bip32.keyPair(privateKey.toFixedKeySize()).publicKey,
-        Unit,
-    )
-
-    override fun sign(message: ByteArray): Deferred<ByteArray> = super<Secp256k1KeyPair>.sign(message)
 }
 
 open class TerraMnemonicKey private constructor(
     override val mnemonic: String,
+    override val coinType: Int = COIN_TYPE,
+    override val account: Int = 0,
     override val index: Int = 0,
     override val passphrase: String? = null,
     bip32KeyPair: Bip32KeyPair,
-) : BaseCosmosMnemonicKey, TerraKeyPair(bip32KeyPair) {
+) : BIP44MnemonicKey, TerraSecp256k1KeyPair(bip32KeyPair) {
 
-    override val coinType = COIN_TYPE
-    override val account = ACCOUNT
     override val change = CHANGE
 
     constructor(
         mnemonic: String,
+        coinType: Int = COIN_TYPE,
+        account: Int = 0,
         index: Int = 0,
         passphrase: String? = null,
     ) : this(
         mnemonic,
+        coinType,
+        account,
         index,
         passphrase,
-        Bip32.keyPair(Mnemonic.seedFrom(mnemonic, passphrase), Bip44.hdPath(COIN_TYPE, ACCOUNT, CHANGE, index)),
+        Bip32.keyPair(Mnemonic.seedFrom(mnemonic, passphrase), Bip44.hdPath(coinType, account, CHANGE, index)),
     )
 
     companion object {
         const val COIN_TYPE = 330
-        const val ACCOUNT = 0
         const val CHANGE = 0
 
         fun create(
+            coinType: Int = COIN_TYPE,
+            account: Int = 0,
             index: Int = 0,
             passphrase: String? = null,
-        ) = TerraMnemonicKey(Mnemonic.generate(), index, passphrase)
+        ) = TerraMnemonicKey(Mnemonic.generate(), coinType, account, index, passphrase)
     }
 }
 
-open class TerraConsensusPublicKey(override val publicKey: ByteArray) : Ed25519PublicKey {
-
-    @Deprecated("Not yet implemented")
-    override fun verify(message: ByteArray, signature: ByteArray): Boolean {
-        TODO("Not yet implemented")
-    }
-}
+open class TerraEd25519PublicKey(override val publicKey: ByteArray) : Ed25519PublicKey

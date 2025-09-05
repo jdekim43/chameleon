@@ -2,7 +2,7 @@ package kr.jadekim.chameleon.sei.wallet.test
 
 import kr.jadekim.chameleon.core.key.privateKeyHex
 import kr.jadekim.chameleon.core.key.publicKeyHex
-import kr.jadekim.chameleon.sei.key.SeiKeyPair
+import kr.jadekim.chameleon.sei.key.SeiSecp256k1KeyPair
 import kr.jadekim.chameleon.sei.wallet.SeiAddress
 import kr.jadekim.chameleon.sei.wallet.SeiWallet
 import kotlin.test.Test
@@ -62,11 +62,11 @@ class SeiWalletTest {
     fun succeedFromKeyPair() {
         val wallet1 = SeiWallet.fromKeyPair(NORMAL.privateKeyHex, NORMAL.publicKeyHex)
         assertEquals(NORMAL.address, wallet1.address.text)
-        assertEquals(NORMAL.privateKeyHex, (wallet1.key as SeiKeyPair).privateKeyHex)
-        assertEquals(NORMAL.publicKeyHex, (wallet1.key as SeiKeyPair).publicKeyHex)
+        assertEquals(NORMAL.privateKeyHex, (wallet1.key as SeiSecp256k1KeyPair).privateKeyHex)
+        assertEquals(NORMAL.publicKeyHex, (wallet1.key as SeiSecp256k1KeyPair).publicKeyHex)
         assertEquals(
             NORMAL.publicKeyBech32,
-            SeiAddress.createAccountPublicKeyAddress(wallet1.key as SeiKeyPair).text
+            SeiAddress.createAccountPublicKeyAddress(wallet1.key as SeiSecp256k1KeyPair).text
         )
     }
 
@@ -74,11 +74,11 @@ class SeiWalletTest {
     fun succeedFromPrivateKey() {
         val wallet = SeiWallet.fromKeyPair(NORMAL.privateKeyHex)
         assertEquals(NORMAL.address, wallet.address.text)
-        assertEquals(NORMAL.privateKeyHex, (wallet.key as SeiKeyPair).privateKeyHex)
-        assertEquals(NORMAL.publicKeyHex, (wallet.key as SeiKeyPair).publicKeyHex)
+        assertEquals(NORMAL.privateKeyHex, (wallet.key as SeiSecp256k1KeyPair).privateKeyHex)
+        assertEquals(NORMAL.publicKeyHex, (wallet.key as SeiSecp256k1KeyPair).publicKeyHex)
         assertEquals(
             NORMAL.publicKeyBech32,
-            SeiAddress.createAccountPublicKeyAddress(wallet.key as SeiKeyPair).text
+            SeiAddress.createAccountPublicKeyAddress(wallet.key as SeiSecp256k1KeyPair).text
         )
     }
 
@@ -86,11 +86,11 @@ class SeiWalletTest {
     fun succeedFromMnemonic() {
         val wallet = SeiWallet.fromMnemonic(NORMAL.mnemonic)
         assertEquals(NORMAL.address, wallet.address.text)
-        assertEquals(NORMAL.privateKeyHex, (wallet.key as SeiKeyPair).privateKeyHex)
-        assertEquals(NORMAL.publicKeyHex, (wallet.key as SeiKeyPair).publicKeyHex)
+        assertEquals(NORMAL.privateKeyHex, (wallet.key as SeiSecp256k1KeyPair).privateKeyHex)
+        assertEquals(NORMAL.publicKeyHex, (wallet.key as SeiSecp256k1KeyPair).publicKeyHex)
         assertEquals(
             NORMAL.publicKeyBech32,
-            SeiAddress.createAccountPublicKeyAddress(wallet.key as SeiKeyPair).text
+            SeiAddress.createAccountPublicKeyAddress(wallet.key as SeiSecp256k1KeyPair).text
         )
     }
 }

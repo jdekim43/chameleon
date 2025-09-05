@@ -1,0 +1,22 @@
+{
+  "@type": "/cosmos.crypto.multisig.LegacyAminoPubKey",
+  "threshold": 2,
+  "public_keys": [
+    {
+      "@type": "/injective.crypto.v1beta1.ethsecp256k1.PubKey",
+      "key": "AmzYf57OTR1S8zTdNu+TXxNXWUrz2GSnVh//WVfi35yi"
+    },
+    {
+      "@type": "/injective.crypto.v1beta1.ethsecp256k1.PubKey",
+      "key": "AuFAE+AnIE7/33CpykyHeRphW++0QIlHVe8wDiAlKbSH"
+    },
+    {
+      "@type": "/injective.crypto.v1beta1.ethsecp256k1.PubKey",
+      "key": "ArbsIXbSfoi0Tp/RvVhCSsRMsNaK+l+dNaCWyFQkJ7OZ"
+    },
+    {
+      "@type": "/injective.crypto.v1beta1.ethsecp256k1.PubKey",
+      "key": "A6a+H1byZk6UY55tXE63ViN7Z9WTK0NahR1uKd6UzWeI"
+    }
+  ]
+}

@@ -7,13 +7,15 @@ kotlin {
 
                 api(project(":chameleon-cosmos:chameleon-cosmos-wallet"))
 
-                implementation(project(":chameleon-core:chameleon-core-crypto"))
+                api(project(":chameleon-core:chameleon-core-crypto"))
 
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCoroutineVersion")
 
-                implementation("kr.jadekim:common-util:$commonUtilVersion")
-                implementation("kr.jadekim:common-hash:$commonUtilVersion")
-                implementation("kr.jadekim:common-encoder:$commonUtilVersion")
+                api("kr.jadekim:common-util:$commonUtilVersion")
+                api("kr.jadekim:common-hash:$commonUtilVersion")
+                api("kr.jadekim:common-encoder:$commonUtilVersion")
+
+                compileOnly(project(":chameleon-cosmos:chameleon-cosmos-type"))
             }
         }
     }

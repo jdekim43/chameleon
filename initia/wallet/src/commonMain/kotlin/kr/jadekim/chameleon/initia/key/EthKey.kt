@@ -1,52 +1,61 @@
 package kr.jadekim.chameleon.initia.key
 
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
 import kr.jadekim.chameleon.core.crypto.*
-import kr.jadekim.chameleon.cosmos.key.BaseCosmosMnemonicKey
-import kr.jadekim.chameleon.cosmos.key.Secp256k1KeyPair
-import kr.jadekim.chameleon.cosmos.key.Secp256k1PublicKey
-import kr.jadekim.common.extension.toFixed
+import kr.jadekim.chameleon.core.key.BIP44MnemonicKey
+import kr.jadekim.chameleon.core.key.Key
+import kr.jadekim.chameleon.core.key.KeyPair
+import kr.jadekim.chameleon.cosmos.key.truncateAsCosmosKeySize
+import kr.jadekim.common.extension.utf8
 
-const val INITIA_ETH_KEY_SIZE = 33
+open class InitiaEtherSecp256k1PublicKey(publicKey: ByteArray) : Key {
 
-internal fun ByteArray.toFixedEthKeySize() = toFixed(INITIA_ETH_KEY_SIZE)
+    override val publicKey: ByteArray = publicKey.truncateAsCosmosKeySize()
 
-open class InitiaEthPublicKey(publicKey: ByteArray) : Secp256k1PublicKey, InitiaPublicKey {
+    override val address: ByteArray
+        get() {
+            val uncompressedPublicKey = Bip32.decompressPublicKey(publicKey)
+            val hashed = Keccak256.hash(uncompressedPublicKey.sliceArray(1 until uncompressedPublicKey.size))
 
-    override val publicKey: ByteArray = publicKey.toFixedEthKeySize()
+            return hashed.sliceArray(hashed.size - 20 until hashed.size)
+        }
 
     override fun verify(message: ByteArray, signature: ByteArray): Boolean {
         return Bip32.verify(Keccak256.hash(message), publicKey, signature)
     }
 }
 
-open class InitiaEthKeyPair private constructor(
-    override val privateKey: ByteArray,
-    override val publicKey: ByteArray,
+open class InitiaEtherSecp256k1KeyPair private constructor(
+    privateKey: ByteArray,
+    publicKey: ByteArray,
     unit: Unit, //avoid jvm duplicate signature
-) : Secp256k1KeyPair, InitiaEthPublicKey(publicKey), InitiaKeyPair {
+) : KeyPair, InitiaEtherSecp256k1PublicKey(publicKey) {
 
-    internal constructor(keyPair: Bip32KeyPair) : this(keyPair.privateKey, keyPair.publicKey)
+    override val privateKey: ByteArray = privateKey.truncateAsCosmosKeySize()
 
-    constructor(privateKey: ByteArray, publicKey: ByteArray? = null) : this(
-        privateKey.toFixedEthKeySize(),
-        publicKey?.toFixedEthKeySize() ?: Bip32.keyPair(privateKey.toFixedEthKeySize()).publicKey,
-        Unit,
-    )
+    constructor(
+        privateKey: ByteArray,
+        publicKey: ByteArray? = null,
+    ) : this(privateKey, publicKey ?: Bip32.keyPair(privateKey.truncateAsCosmosKeySize()).publicKey, Unit)
 
-    override fun signSync(message: ByteArray): ByteArray = Bip32.sign(Keccak256.hash(message), privateKey)
+    constructor(keyPair: Bip32KeyPair) : this(keyPair.privateKey, keyPair.publicKey)
 
-    override fun sign(message: ByteArray): Deferred<ByteArray> = super<Secp256k1KeyPair>.sign(message)
+    fun signSync(message: ByteArray): ByteArray = Bip32.sign(Keccak256.hash(message), privateKey)
+
+    fun signSync(message: String): ByteArray = signSync(message.utf8())
+
+    override fun sign(message: ByteArray): Deferred<ByteArray> = CompletableDeferred(signSync(message))
 }
 
-open class InitiaEthMnemonicKey private constructor(
+open class InitiaEtherMnemonicKey private constructor(
     override val mnemonic: String,
-    override val coinType: Int,
-    override val account: Int,
-    override val index: Int,
-    override val passphrase: String?,
+    override val coinType: Int = COIN_TYPE,
+    override val account: Int = 0,
+    override val index: Int = 0,
+    override val passphrase: String? = null,
     bip32KeyPair: Bip32KeyPair,
-) : BaseCosmosMnemonicKey, InitiaEthKeyPair(bip32KeyPair), InitiaMnemonicKey {
+) : BIP44MnemonicKey, InitiaEtherSecp256k1KeyPair(bip32KeyPair) {
 
     override val change = CHANGE
 
@@ -74,7 +83,7 @@ open class InitiaEthMnemonicKey private constructor(
             account: Int = 0,
             index: Int = 0,
             passphrase: String? = null,
-        ) = InitiaEthMnemonicKey(Mnemonic.generate(), coinType, account, index, passphrase)
+        ) = InitiaEtherMnemonicKey(Mnemonic.generate(), coinType, account, index, passphrase)
     }
 }
 

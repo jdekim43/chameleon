@@ -1,12 +1,13 @@
 package kr.jadekim.chameleon.injective.wallet
 
+import kr.jadekim.chameleon.core.key.Key
 import kr.jadekim.chameleon.core.wallet.Wallet
 import kr.jadekim.chameleon.injective.key.InjectiveKeyPair
 import kr.jadekim.chameleon.injective.key.InjectiveMnemonicKey
 import kr.jadekim.chameleon.injective.key.InjectivePublicKey
 import kr.jadekim.common.encoder.decodeHex
 
-class InjectiveWallet(override val address: InjectiveAddress, override val key: InjectivePublicKey? = null) : Wallet {
+class InjectiveWallet(override val address: InjectiveAddress, override val key: Key? = null) : Wallet {
 
     companion object {
 
@@ -27,7 +28,8 @@ class InjectiveWallet(override val address: InjectiveAddress, override val key: 
         @JvmOverloads
         fun fromMnemonic(
             mnemonic: String,
-            coinType: Int = InjectiveMnemonicKey.COIN_TYPE, account: Int = 0,
+            coinType: Int = InjectiveMnemonicKey.COIN_TYPE,
+            account: Int = 0,
             index: Int = 0,
             passphrase: String? = null,
         ) = InjectiveWallet(InjectiveMnemonicKey(mnemonic, coinType, account, index, passphrase))
@@ -47,7 +49,7 @@ class InjectiveWallet(override val address: InjectiveAddress, override val key: 
         ) = InjectiveWallet(InjectiveKeyPair(privateKey.decodeHex(), publicKey?.decodeHex()))
     }
 
-    constructor(key: InjectivePublicKey) : this(InjectiveAddress.createAccountAddress(key), key)
+    constructor(key: Key) : this(InjectiveAddress.createAccountAddress(key), key)
 
     constructor(publicKey: ByteArray) : this(InjectivePublicKey(publicKey))
 }

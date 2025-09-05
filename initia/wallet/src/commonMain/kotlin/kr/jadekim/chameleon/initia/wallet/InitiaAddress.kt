@@ -1,30 +1,10 @@
 package kr.jadekim.chameleon.initia.wallet
 
 import kr.jadekim.chameleon.core.crypto.Bech32
-import kr.jadekim.chameleon.core.crypto.Bip32
-import kr.jadekim.chameleon.core.crypto.Keccak256
-import kr.jadekim.chameleon.cosmos.key.Ed25519PublicKey
-import kr.jadekim.chameleon.cosmos.key.Secp256k1PublicKey
-import kr.jadekim.chameleon.cosmos.wallet.Bech32Address
-import kr.jadekim.chameleon.initia.key.InitiaEthPublicKey
+import kr.jadekim.chameleon.core.key.Key
+import kr.jadekim.chameleon.core.wallet.Bech32Address
 import kr.jadekim.common.encoder.HEX
 import kr.jadekim.common.encoder.encodeHex
-import kr.jadekim.chameleon.cosmos.key.toAddress as toCosmosBasedAddress
-
-private fun Secp256k1PublicKey.toEtherBasedAddress(): ByteArray {
-    val uncompressedPublicKey = Bip32.decompressPublicKey(publicKey)
-    val hashed = Keccak256.hash(uncompressedPublicKey.sliceArray(1 until uncompressedPublicKey.size))
-
-    return hashed.sliceArray(hashed.size - 20 until hashed.size)
-}
-
-private fun Secp256k1PublicKey.toAddress(): ByteArray {
-    if (this is InitiaEthPublicKey) {
-        return toEtherBasedAddress()
-    }
-
-    return toCosmosBasedAddress()
-}
 
 @JvmInline
 value class InitiaAddress(override val text: String) : Bech32Address<InitiaAddress.Hrp> {
@@ -47,35 +27,21 @@ value class InitiaAddress(override val text: String) : Bech32Address<InitiaAddre
     companion object {
 
         @JvmStatic
-        fun createAccountAddress(publicKey: Secp256k1PublicKey): InitiaAddress = InitiaAddress(
-            Bech32.encode(
-                Hrp.ACCOUNT.value,
-                Bech32.toWords(publicKey.toAddress()),
-            ),
+        fun createAccountAddress(key: Key): InitiaAddress = InitiaAddress(
+            Bech32.encode(Hrp.ACCOUNT.value, Bech32.toWords(key.address)),
         )
 
         @JvmStatic
-        fun createAccountPublicKeyAddress(publicKey: Secp256k1PublicKey): InitiaAddress = InitiaAddress(
+        fun createAccountPublicKeyAddress(key: Key): InitiaAddress = InitiaAddress(
             Bech32.encode(
                 Hrp.ACCOUNT_PUBLIC_KEY.value,
-                Bech32.toWords(HEX.decode("eb5ae98721") + publicKey.publicKey),
+                Bech32.toWords(HEX.decode("eb5ae98721") + key.publicKey),
             )
         )
 
         @JvmStatic
-        fun createConsensusAddress(publicKey: Ed25519PublicKey): InitiaAddress = InitiaAddress(
-            Bech32.encode(
-                Hrp.CONSENSUS_NODE.value,
-                publicKey.toCosmosBasedAddress(),
-            )
-        )
-
-        @JvmStatic
-        fun createConsensusAddress(bytes: ByteArray): InitiaAddress = InitiaAddress(
-            Bech32.encode(
-                Hrp.CONSENSUS_NODE.value,
-                Bech32.toWords(bytes),
-            )
+        fun createConsensusAddress(key: Key): InitiaAddress = InitiaAddress(
+            Bech32.encode(Hrp.CONSENSUS_NODE.value, Bech32.toWords(key.address))
         )
 
         @JvmStatic
