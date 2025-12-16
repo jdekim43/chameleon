@@ -10,7 +10,7 @@ kotlin {
                 implementation(project(":chameleon-cosmos:chameleon-cosmos-wallet"))
                 implementation("kr.jadekim:kotlin-protobuf-core:$kotlinProtobufVersion")
 
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCoroutineVersion")
+                implementation(libs.kotlinx.coroutine.core)
             }
         }
     }

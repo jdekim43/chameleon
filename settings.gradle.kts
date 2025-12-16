@@ -44,3 +44,15 @@ fun ProjectDescriptor.renameChildren() {
 }
 
 rootProject.renameChildren()
+
+dependencyResolutionManagement {
+    repositories {
+        mavenCentral()
+    }
+
+    versionCatalogs {
+        create("kotlinWrappers") {
+            from("org.jetbrains.kotlin-wrappers:kotlin-wrappers-catalog:2025.11.12")
+        }
+    }
+}

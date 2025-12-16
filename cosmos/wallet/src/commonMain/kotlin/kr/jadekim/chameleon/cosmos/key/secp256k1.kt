@@ -1,55 +1,29 @@
 package kr.jadekim.chameleon.cosmos.key
 
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.Deferred
-import kr.jadekim.chameleon.core.crypto.Bip32
-import kr.jadekim.chameleon.core.crypto.Ripemd160
-import kr.jadekim.chameleon.core.key.Key
+import kr.jadekim.chameleon.core.hd.HDPrivateKey
+import kr.jadekim.chameleon.core.hd.HDPublicKey
+import kr.jadekim.chameleon.core.key.HDSecp256k1PrivateKey
+import kr.jadekim.chameleon.core.key.HDSecp256k1PublicKey
 import kr.jadekim.chameleon.core.key.KeyPair
-import kr.jadekim.common.encoder.decodeBase64
-import kr.jadekim.common.extension.toFixed
-import kr.jadekim.common.extension.utf8
-import kr.jadekim.common.hash.SHA_256
 
-const val COSMOS_KEY_SIZE = 33
+open class CosmosSecp256k1PublicKey(override val hdPublicKey: HDPublicKey) : HDSecp256k1PublicKey {
 
-fun ByteArray.truncateAsCosmosKeySize() = toFixed(COSMOS_KEY_SIZE)
-
-interface Secp256k1PublicKey : Key {
-
-    override val address: ByteArray
-        get() = Ripemd160.hash(SHA_256.hash(publicKey))
-
-    override fun verify(message: ByteArray, signature: ByteArray): Boolean {
-        return Bip32.verify(SHA_256.hash(message), publicKey, signature)
-    }
-
-    companion object {
-
-        @JvmStatic
-        fun recoverFromSignature(message: ByteArray, signature: ByteArray) = object : Secp256k1PublicKey {
-            override val publicKey: ByteArray = Bip32.recoverPublicKey(SHA_256.hash(message), signature)
-        }
-
-        @JvmStatic
-        fun recoverFromSignature(message: String, signature: ByteArray) =
-            recoverFromSignature(message.utf8(), signature)
-
-        @JvmStatic
-        fun recoverFromSignature(message: ByteArray, signature: String) =
-            recoverFromSignature(message, signature.decodeBase64())
-
-        @JvmStatic
-        fun recoverFromSignature(message: String, signature: String) =
-            recoverFromSignature(message.utf8(), signature.decodeBase64())
-    }
+    constructor(publicKey: ByteArray) : this(HDPublicKey(publicKey))
 }
 
-interface Secp256k1KeyPair : KeyPair, Secp256k1PublicKey {
+open class CosmosSecp256k1PrivateKey(
+    override val hdPrivateKey: HDPrivateKey,
+    hdPublicKey: HDPublicKey? = null,
+) : KeyPair,
+    HDSecp256k1PrivateKey,
+    CosmosSecp256k1PublicKey(hdPublicKey ?: hdPrivateKey.createPublicKey()) {
 
-    fun signSync(message: ByteArray): ByteArray = Bip32.sign(SHA_256.hash(message), privateKey)
+    constructor(
+        privateKey: ByteArray,
+        publicKey: ByteArray? = null,
+    ) : this(HDPrivateKey(privateKey), publicKey?.let { HDPublicKey(it) })
 
-    fun signSync(message: String): ByteArray = signSync(message.utf8())
-
-    override fun sign(message: ByteArray): Deferred<ByteArray> = CompletableDeferred(signSync(message))
+    init {
+        //todo: check public key and private key are paired correctly.
+    }
 }

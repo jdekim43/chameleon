@@ -13,7 +13,7 @@ kotlin {
                 implementation("kr.jadekim:chameleon-proto-cosmos-sdk:$cosmosSdkVersion-$chameleonProtoBuildVersion")
                 implementation("kr.jadekim:kotlin-protobuf-grpc:$kotlinProtobufVersion")
 
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCoroutineVersion")
+                implementation(libs.kotlinx.coroutine.core)
             }
         }
 

@@ -8,7 +8,7 @@ kotlin {
                 api(project(":chameleon-inertia:chameleon-inertia-type"))
                 api(project(":chameleon-initia:chameleon-initia-wallet"))
 
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCoroutineVersion")
+                implementation(libs.kotlinx.coroutine.core)
             }
         }
 

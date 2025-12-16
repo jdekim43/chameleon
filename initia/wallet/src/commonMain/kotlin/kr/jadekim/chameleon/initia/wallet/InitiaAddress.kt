@@ -1,13 +1,17 @@
 package kr.jadekim.chameleon.initia.wallet
 
-import kr.jadekim.chameleon.core.crypto.Bech32
-import kr.jadekim.chameleon.core.key.Key
+import kr.jadekim.chameleon.core.crypto.bech32.Bech32
+import kr.jadekim.chameleon.core.wallet.Address
 import kr.jadekim.chameleon.core.wallet.Bech32Address
-import kr.jadekim.common.encoder.HEX
-import kr.jadekim.common.encoder.encodeHex
+import kr.jadekim.chameleon.core.wallet.HexAddress
+import kr.jadekim.chameleon.initia.key.InitiaEd25519PublicKey
+import kr.jadekim.chameleon.initia.key.InitiaEtherSecp256k1PublicKey
+import kr.jadekim.chameleon.initia.key.InitiaSecp256k1PublicKey
+import kr.jadekim.common.encoder.Hex
+import kr.jadekim.common.encoder.decode
+import kotlin.jvm.JvmStatic
 
-@JvmInline
-value class InitiaAddress(override val text: String) : Bech32Address<InitiaAddress.Hrp> {
+object InitiaAddress {
 
     enum class Hrp(val value: String) {
         ACCOUNT("init"),
@@ -20,43 +24,40 @@ value class InitiaAddress(override val text: String) : Bech32Address<InitiaAddre
         companion object {
 
             @JvmStatic
-            fun fromHrp(hrp: String): Hrp? = entries.firstOrNull { it.value.equals(hrp, true) }
+            fun from(text: String): InitiaAddress.Hrp? =
+                InitiaAddress.Hrp.entries.firstOrNull { it.value.equals(text, true) }
         }
     }
 
-    companion object {
+    @JvmStatic
+    fun createAccountAddress(key: InitiaSecp256k1PublicKey): Address = Bech32Address(Hrp.ACCOUNT.value, key.toAddress())
 
-        @JvmStatic
-        fun createAccountAddress(key: Key): InitiaAddress = InitiaAddress(
-            Bech32.encode(Hrp.ACCOUNT.value, Bech32.toWords(key.address)),
-        )
+    @JvmStatic
+    fun createAccountAddress(key: InitiaEtherSecp256k1PublicKey): Address =
+        Bech32Address(Hrp.ACCOUNT.value, key.toAddress())
 
-        @JvmStatic
-        fun createAccountPublicKeyAddress(key: Key): InitiaAddress = InitiaAddress(
-            Bech32.encode(
-                Hrp.ACCOUNT_PUBLIC_KEY.value,
-                Bech32.toWords(HEX.decode("eb5ae98721") + key.publicKey),
-            )
-        )
+    @JvmStatic
+    fun createAccountEtherAddress(key: InitiaSecp256k1PublicKey): Address = HexAddress(key.toAddress())
 
-        @JvmStatic
-        fun createConsensusAddress(key: Key): InitiaAddress = InitiaAddress(
-            Bech32.encode(Hrp.CONSENSUS_NODE.value, Bech32.toWords(key.address))
-        )
+    @JvmStatic
+    fun createAccountEtherAddress(key: InitiaEtherSecp256k1PublicKey): Address = HexAddress(key.toAddress())
 
-        @JvmStatic
-        fun isValidAddress(address: String, hrp: Hrp): Boolean = try {
-            val (parsedHrp, _) = Bech32.decode(address)
+    @JvmStatic
+    fun createAccountPublicKeyAddress(key: InitiaSecp256k1PublicKey): Address = Bech32Address(
+        Hrp.ACCOUNT_PUBLIC_KEY.value,
+        "eb5ae98721".decode(Hex) + key.publicKey,
+    )
 
-            Hrp.fromHrp(parsedHrp) == hrp
-        } catch (e: Exception) {
-            false
-        }
+    @JvmStatic
+    fun createConsensusAddress(key: InitiaEd25519PublicKey): Address =
+        Bech32Address(Hrp.CONSENSUS_NODE.value, key.toAddress())
+
+    @JvmStatic
+    fun isValidAddress(address: String, expectedHrps: List<String>? = Hrp.entries.map { it.value }): Boolean = try {
+        val (parsedHrp, _) = Bech32.decode(address)
+
+        expectedHrps == null || expectedHrps.contains(parsedHrp)
+    } catch (e: Exception) {
+        false
     }
-
-    val ethereumAddress: String
-        get() = "0x${data.encodeHex()}"
-
-    override fun parseHrp(text: String): Hrp = Hrp.fromHrp(text)
-        ?: throw IllegalArgumentException("Unknown bech32 hrp for initia address")
 }

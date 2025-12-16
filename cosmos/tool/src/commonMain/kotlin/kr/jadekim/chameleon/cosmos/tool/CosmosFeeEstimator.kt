@@ -117,7 +117,7 @@ open class CosmosNodeFeeEstimator(
     }
 
     protected open suspend fun createSignerInfo(sender: Wallet): SignerInfo {
-        val key = sender.key ?: throw IllegalArgumentException("Wallet must have a key")
+        val key = sender.publicKey ?: throw IllegalArgumentException("Wallet must have a key")
         val sequence = accountInfoProvider.get(sender.address.text)?.sequence ?: 0u
 
         return SignerInfo(

@@ -1,18 +1,16 @@
 package kr.jadekim.chameleon.cosmos.key
 
-import kr.jadekim.chameleon.core.key.Key
+import kr.jadekim.chameleon.core.key.PublicKey
+import kr.jadekim.common.crypto.hash.SHA_256
+import kr.jadekim.common.crypto.hash.hash
 
-interface Ed25519PublicKey : Key {
+private const val ADDRESS_TRUNCATE_LENGTH = 20
 
-    override val address: ByteArray
-        get() = addressFromPublicKeyHash
+open class CosmosEd25519PublicKey(override val publicKey: ByteArray) : PublicKey {
 
-    @Deprecated("Not yet implemented")
     override fun verify(message: ByteArray, signature: ByteArray): Boolean {
         TODO("Not yet implemented")
     }
-}
 
-//interface Ed25519KeyPair : KeyPair, Secp256k1PublicKey {
-//    override fun sign(message: ByteArray): Deferred<ByteArray> = CompletableDeferred(/*todo*/)
-//}
+    fun toAddress(): ByteArray = publicKey.hash(SHA_256).sliceArray(0 until ADDRESS_TRUNCATE_LENGTH)
+}

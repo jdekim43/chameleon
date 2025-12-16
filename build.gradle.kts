@@ -1,21 +1,24 @@
+import org.jetbrains.dokka.gradle.tasks.DokkaGeneratePublicationTask
 import org.jreleaser.model.Active
 import org.jreleaser.model.Signing
 
 plugins {
-    kotlin("multiplatform") version "2.1.21"
-    id("org.jetbrains.dokka") version "2.0.0"
-    id("maven-publish")
-    id("org.jreleaser") version "1.18.0"
-}
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.dokka)
+    alias(libs.plugins.dokka.javadoc)
+    alias(libs.plugins.jreleaser)
 
-group = "kr.jadekim"
-version = "0.4.9"
+    id("maven-publish")
+}
 
 allprojects {
     repositories {
         mavenCentral()
         mavenLocal()
     }
+
+    group = "kr.jadekim"
+    version = "0.5.0-beta1"
 }
 
 configure(allprojects.filter { !it.hasProperty("IGNORE_GLOBAL_CONFIGURATION") }) {
@@ -34,13 +37,9 @@ configure(allprojects.filter { !it.hasProperty("IGNORE_GLOBAL_CONFIGURATION") })
         }
 
         sourceSets {
-            val commonMain by getting
-            val commonTest by getting {
-                dependencies {
-                    implementation(kotlin("test"))
-                }
+            commonTest.dependencies {
+                implementation(kotlin("test"))
             }
-//            val jvmMain by getting
 //            val jvmTest by getting {
 //                dependencies {
 //                    val junitVersion: String by project
@@ -55,11 +54,10 @@ configure(allprojects.filter { !it.hasProperty("IGNORE_GLOBAL_CONFIGURATION") })
         }
     }
 
-    val dokkaHtml by tasks.getting(org.jetbrains.dokka.gradle.DokkaTask::class)
     val javadocJar: TaskProvider<Jar> by tasks.registering(Jar::class) {
-        dependsOn(dokkaHtml)
+        dependsOn(tasks.named<DokkaGeneratePublicationTask>("dokkaGeneratePublicationHtml"))
         archiveClassifier.set("javadoc")
-        from(dokkaHtml.outputDirectory)
+        from(tasks.named<DokkaGeneratePublicationTask>("dokkaGeneratePublicationHtml").flatMap { it.outputDirectory })
     }
 
     publishing {
@@ -97,9 +95,16 @@ configure(allprojects.filter { !it.hasProperty("IGNORE_GLOBAL_CONFIGURATION") })
     }
 }
 
-subprojects {
-    group = rootProject.group
-    version = rootProject.version
+configure(subprojects.filter { it.hasProperty("SUPPORT_FULL_MPP") && it.property("SUPPORT_FULL_MPP")?.toString()?.toBoolean() == true }) {
+    kotlin {
+//        js {
+//            browser()
+//            nodejs()
+//        }
+
+        iosArm64()
+        iosSimulatorArm64()
+    }
 }
 
 jreleaser {

@@ -9,8 +9,7 @@ import cosmos.tx.v1beta1.SignDocConverter.toByteArray
 import cosmos.tx.v1beta1.SignerInfo
 import cosmos.tx.v1beta1.Tx
 import cosmos.tx.v1beta1.TxBodyConverter.toByteArray
-import kr.jadekim.chameleon.core.key.Key
-import kr.jadekim.chameleon.core.key.SignableKey
+import kr.jadekim.chameleon.core.key.PublicKey
 import kr.jadekim.chameleon.core.tool.TransactionSigner
 import kr.jadekim.chameleon.core.wallet.Wallet
 import kr.jadekim.chameleon.cosmos.wallet.CosmosWallet
@@ -39,13 +38,14 @@ open class CosmosTransactionDirectSigner(
     ): Tx = sign(transaction, wallet, chainId).second
 
     suspend fun sign(transaction: Tx, wallet: Wallet, chainId: String): Pair<CosmosSignature, Tx> {
-        val key = wallet.key as? SignableKey ?: throw IllegalArgumentException("Wallet is not a signable key")
+        val publicKey = wallet.publicKey ?: throw IllegalArgumentException("Wallet does not have publicKey")
+        val signer = wallet.signer ?: throw IllegalArgumentException("Wallet is not signable")
         var signerInfo = transaction.authInfo.signerInfos.findByAddress(wallet.address.text)
         val isProvidedSignerInfo = signerInfo != null
         val accountInfo = accountInfoProvider.get(wallet.address.text) ?: AccountInfo(wallet)
 
         if (signerInfo == null) {
-            signerInfo = createSignerInfo(key, accountInfo)
+            signerInfo = createSignerInfo(publicKey, accountInfo)
         }
 
         if (signerInfo.sequence == 0uL && accountInfo.sequence != 0uL) {
@@ -58,7 +58,7 @@ open class CosmosTransactionDirectSigner(
             chainId,
             accountInfo.accountNumber,
         )
-        val signature = key.sign(document.toByteArray()).await()
+        val signature = signer.sign(document.toByteArray()).await()
 
         val authInfo = if (isProvidedSignerInfo) {
             transaction.authInfo
@@ -78,7 +78,7 @@ open class CosmosTransactionDirectSigner(
                 && CosmosWallet(cosmos.crypto.secp256k1.PubKeyConverter.deserialize(it.publicKey.value).key).address.text == address
     }
 
-    protected open fun createSignerInfo(key: Key, accountInfo: AccountInfo) = SignerInfo(
+    protected open fun createSignerInfo(key: PublicKey, accountInfo: AccountInfo) = SignerInfo(
         cosmos.crypto.secp256k1.PubKey(key.publicKey).toAny(),
         ModeInfo(ModeInfo.SumOneOf.Single(ModeInfo.Single(SignMode.SIGN_MODE_DIRECT))),
         accountInfo.sequence,

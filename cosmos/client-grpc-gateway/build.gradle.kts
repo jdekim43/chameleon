@@ -14,7 +14,7 @@ kotlin {
                 implementation("kr.jadekim:chameleon-proto-cosmos-sdk:$cosmosSdkVersion-$chameleonProtoBuildVersion")
                 implementation("kr.jadekim:kotlin-protobuf-grpc-gateway:$kotlinProtobufVersion")
 
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCoroutineVersion")
+                implementation(libs.kotlinx.coroutine.core)
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinxSerializationVersion")
             }
         }
@@ -22,8 +22,10 @@ kotlin {
         val jvmMain by getting {
             dependencies {
                 val ktorVersion: String by project
+                val protobufVersion: String by project
 
                 implementation("io.ktor:ktor-client-okhttp:$ktorVersion")
+                implementation("com.google.protobuf:protobuf-java:${protobufVersion}")
             }
         }
     }

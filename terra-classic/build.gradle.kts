@@ -8,7 +8,7 @@ kotlin {
                 api(project(":chameleon-terra:chameleon-terra-wallet"))
                 api(project(":chameleon-terra-classic:chameleon-terra-classic-type"))
 
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCoroutineVersion")
+                implementation(libs.kotlinx.coroutine.core)
             }
         }
     }

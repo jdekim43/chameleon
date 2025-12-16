@@ -1,17 +1,17 @@
 kotlin {
     sourceSets {
-        val commonMain by getting {
-            dependencies {
-                val kotlinxCoroutineVersion: String by project
-                val commonUtilVersion: String by project
+        commonMain.dependencies {
+            implementation(project(":chameleon-core:chameleon-core-crypto"))
 
-                implementation(project(":chameleon-core:chameleon-core-crypto"))
+            implementation(libs.kotlinx.coroutine.core)
 
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCoroutineVersion")
+            implementation(libs.jade.common.util)
+            implementation(libs.jade.common.encoder)
+            implementation(libs.jade.common.crypto)
 
-                implementation("kr.jadekim:common-util:$commonUtilVersion")
-                implementation("kr.jadekim:common-encoder:$commonUtilVersion")
-            }
+            implementation(libs.doistx.normalize)
+            implementation(libs.cryptography.core)
+            implementation(libs.cryptography.provider.optimal)
         }
     }
 }

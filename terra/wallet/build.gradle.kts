@@ -3,17 +3,16 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 val kotlinxCoroutineVersion: String by project
-                val commonUtilVersion: String by project
 
-                api(project(":chameleon-cosmos:chameleon-cosmos-wallet"))
+                api(project(":chameleon-core:chameleon-core-wallet"))
 
                 implementation(project(":chameleon-core:chameleon-core-crypto"))
 
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCoroutineVersion")
+                implementation(libs.kotlinx.coroutine.core)
 
-                implementation("kr.jadekim:common-util:$commonUtilVersion")
-                implementation("kr.jadekim:common-hash:$commonUtilVersion")
-                implementation("kr.jadekim:common-encoder:$commonUtilVersion")
+                implementation(libs.jade.common.util)
+                implementation(libs.jade.common.encoder)
+                implementation(libs.jade.common.crypto)
             }
         }
     }

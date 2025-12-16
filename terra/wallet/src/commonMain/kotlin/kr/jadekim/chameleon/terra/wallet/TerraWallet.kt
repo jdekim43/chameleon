@@ -1,55 +1,54 @@
 package kr.jadekim.chameleon.terra.wallet
 
 import kr.jadekim.chameleon.core.key.Key
+import kr.jadekim.chameleon.core.mnemonic.Mnemonic
+import kr.jadekim.chameleon.core.wallet.Address
 import kr.jadekim.chameleon.core.wallet.Wallet
 import kr.jadekim.chameleon.terra.key.TerraMnemonicKey
-import kr.jadekim.chameleon.terra.key.TerraSecp256k1KeyPair
+import kr.jadekim.chameleon.terra.key.TerraSecp256k1PrivateKey
 import kr.jadekim.chameleon.terra.key.TerraSecp256k1PublicKey
-import kr.jadekim.common.encoder.decodeHex
+import kotlin.jvm.JvmOverloads
+import kotlin.jvm.JvmStatic
 
-class TerraWallet(override val address: TerraAddress, override val key: Key? = null) : Wallet {
+class TerraWallet(override val address: Address, override val key: Key? = null) : Wallet {
 
     companion object {
 
         @JvmStatic
         @JvmOverloads
-        fun create(
-            coinType: Int = TerraMnemonicKey.COIN_TYPE,
-            account: Int = 0,
-            index: Int = 0,
-            passphrase: String? = null,
+        suspend fun create(
+            mnemonic: Mnemonic = Mnemonic.generate(Mnemonic.Strength.WORD_24),
+            coinType: UInt = TerraMnemonicKey.COIN_TYPE,
+            account: UInt = 0u,
+            change: UInt = TerraMnemonicKey.CHANGE,
+            index: UInt = 0u,
+            password: String? = null,
         ): Pair<TerraWallet, TerraMnemonicKey> {
-            val key = TerraMnemonicKey.create(coinType, account, index, passphrase)
+            val key = TerraMnemonicKey.from(mnemonic, coinType, account, change, index, password)
 
             return TerraWallet(key) to key
         }
 
         @JvmStatic
         @JvmOverloads
-        fun fromMnemonic(
+        suspend fun fromMnemonic(
             mnemonic: String,
-            coinType: Int = TerraMnemonicKey.COIN_TYPE,
-            account: Int = 0,
-            index: Int = 0,
-            passphrase: String? = null,
-        ) = TerraWallet(TerraMnemonicKey(mnemonic, coinType, account, index, passphrase))
+            coinType: UInt = TerraMnemonicKey.COIN_TYPE,
+            account: UInt = 0u,
+            change: UInt = TerraMnemonicKey.CHANGE,
+            index: UInt = 0u,
+            password: String? = null,
+        ) = create(Mnemonic(mnemonic), coinType, account, change, index, password)
 
         @JvmStatic
         @JvmOverloads
         fun fromKeyPair(
             privateKey: ByteArray,
             publicKey: ByteArray? = null,
-        ) = TerraWallet(TerraSecp256k1KeyPair(privateKey, publicKey))
-
-        @JvmStatic
-        @JvmOverloads
-        fun fromKeyPair(
-            privateKey: String,
-            publicKey: String? = null,
-        ) = TerraWallet(TerraSecp256k1KeyPair(privateKey.decodeHex(), publicKey?.decodeHex()))
+        ) = TerraWallet(TerraSecp256k1PrivateKey(privateKey, publicKey))
     }
 
-    constructor(key: Key) : this(TerraAddress.createAccountAddress(key), key)
+    constructor(key: TerraSecp256k1PublicKey) : this(TerraAddress.createAccountAddress(key), key)
 
     constructor(publicKey: ByteArray) : this(TerraSecp256k1PublicKey(publicKey))
 }
