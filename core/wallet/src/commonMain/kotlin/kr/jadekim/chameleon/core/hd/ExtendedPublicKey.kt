@@ -2,7 +2,7 @@ package kr.jadekim.chameleon.core.hd
 
 import kr.jadekim.common.crypto.mac.HMAC_SHA_512
 import kr.jadekim.common.crypto.mac.hash
-import kr.jadekim.common.encoder.Base58
+import kr.jadekim.common.encoder.Base58WithChecksum
 import kr.jadekim.common.encoder.decode
 import kr.jadekim.common.encoder.encode
 import kr.jadekim.common.extension.toUIntWithinBigEndian
@@ -22,7 +22,7 @@ data class ExtendedPublicKey(
             checkVersion: (UInt) -> Boolean,
             parentPath: KeyPath = KeyPath.EMPTY
         ): Pair<UInt, ExtendedPublicKey> {
-            val decoded = input.decode(Base58)
+            val decoded = input.decode(Base58WithChecksum)
             if (decoded.size != 78) {
                 throw IllegalArgumentException("Invalid length")
             }
@@ -58,7 +58,7 @@ data class ExtendedPublicKey(
 
     val index = path.last()
 
-    val fingerprint: UInt by lazy { 0u }
+    val fingerprint: UInt by lazy { publicKey.hash160.sliceArray(0 until 4).toUIntWithinBigEndian() }
 
     init {
         require(publicKey.isValid()) { "Invalid public key" }
@@ -106,7 +106,7 @@ data class ExtendedPublicKey(
         write(9, index)
         write(13, chainCode)
         write(45, publicKey.compressed)
-    }.encode(Base58)
+    }.encode(Base58WithChecksum)
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

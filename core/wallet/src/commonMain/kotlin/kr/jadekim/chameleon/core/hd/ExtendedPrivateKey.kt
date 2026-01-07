@@ -3,7 +3,7 @@ package kr.jadekim.chameleon.core.hd
 import kr.jadekim.chameleon.core.wif.WalletImportFormat
 import kr.jadekim.common.crypto.mac.HMAC_SHA_512
 import kr.jadekim.common.crypto.mac.hash
-import kr.jadekim.common.encoder.Base58
+import kr.jadekim.common.encoder.Base58WithChecksum
 import kr.jadekim.common.encoder.decode
 import kr.jadekim.common.encoder.encode
 import kr.jadekim.common.extension.toUIntWithinBigEndian
@@ -39,7 +39,7 @@ data class ExtendedPrivateKey(
             checkVersion: (UInt) -> Boolean,
             parentPath: KeyPath = KeyPath.EMPTY
         ): Pair<UInt, ExtendedPrivateKey> {
-            val decoded = input.decode(Base58)
+            val decoded = input.decode(Base58WithChecksum)
             if (decoded.size != 78) {
                 throw IllegalArgumentException("Invalid length")
             }
@@ -109,7 +109,7 @@ data class ExtendedPrivateKey(
         var newPrivateKey = HDPrivateKey(IL)
         require(newPrivateKey.isValid()) { "cannot generate child private key: IL is invalid" }
 
-        newPrivateKey = newPrivateKey + privateKey
+        newPrivateKey += privateKey
         require(newPrivateKey.isValid()) { "cannot generate child private key: resulting private key is invalid" }
 
         return ExtendedPrivateKey(newPrivateKey, IR, depth.inc(), path + index, fingerprint)
@@ -129,7 +129,7 @@ data class ExtendedPrivateKey(
         write(13, chainCode)
         write(45, 0)
         write(46, privateKey.uncompressed)
-    }.encode(Base58)
+    }.encode(Base58WithChecksum)
 
     fun toWIF(version: UByte): String = WalletImportFormat(version, privateKey.uncompressed, true).toString()
 

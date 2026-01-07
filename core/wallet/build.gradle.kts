@@ -13,5 +13,11 @@ kotlin {
             implementation(libs.cryptography.core)
             implementation(libs.cryptography.provider.optimal)
         }
+        commonTest.dependencies {
+            implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
+        }
+        jvmTest.dependencies {
+            implementation(libs.acinq.secp256k1.jni.jvm)
+        }
     }
 }

@@ -7,6 +7,9 @@ plugins {
     alias(libs.plugins.dokka)
     alias(libs.plugins.dokka.javadoc)
     alias(libs.plugins.jreleaser)
+    alias(libs.plugins.kotest)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.goncalossilva.resources)
 
     id("maven-publish")
 }
@@ -18,7 +21,7 @@ allprojects {
     }
 
     group = "kr.jadekim"
-    version = "0.5.0-beta1"
+    version = "0.6.0-beta1"
 }
 
 configure(allprojects.filter { !it.hasProperty("IGNORE_GLOBAL_CONFIGURATION") }) {
@@ -26,10 +29,13 @@ configure(allprojects.filter { !it.hasProperty("IGNORE_GLOBAL_CONFIGURATION") })
         plugin("kotlin-multiplatform")
         plugin("org.jetbrains.dokka")
         plugin("maven-publish")
+        plugin("io.kotest")
+        plugin("com.google.devtools.ksp")
+        plugin("com.goncalossilva.resources")
     }
 
     kotlin {
-        jvmToolchain(11)
+        jvmToolchain(21)
         jvm {
             testRuns["test"].executionTask.configure {
                 useJUnitPlatform()
@@ -38,19 +44,13 @@ configure(allprojects.filter { !it.hasProperty("IGNORE_GLOBAL_CONFIGURATION") })
 
         sourceSets {
             commonTest.dependencies {
-                implementation(kotlin("test"))
+                implementation(rootProject.libs.kotest.framework.engine)
+                implementation(rootProject.libs.kotest.assertions.core)
+                implementation(rootProject.libs.goncalossilva.resources)
             }
-//            val jvmTest by getting {
-//                dependencies {
-//                    val junitVersion: String by project
-//
-//                    implementation(kotlin("test-junit5"))
-//
-//                    runtimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
-//                    compileOnly("org.junit.jupiter:junit-jupiter-api:$junitVersion")
-//                    compileOnly("org.junit.jupiter:junit-jupiter-params:$junitVersion")
-//                }
-//            }
+            jvmTest.dependencies {
+                implementation(rootProject.libs.kotest.runner.junit5)
+            }
         }
     }
 
@@ -95,7 +95,9 @@ configure(allprojects.filter { !it.hasProperty("IGNORE_GLOBAL_CONFIGURATION") })
     }
 }
 
-configure(subprojects.filter { it.hasProperty("SUPPORT_FULL_MPP") && it.property("SUPPORT_FULL_MPP")?.toString()?.toBoolean() == true }) {
+configure(subprojects.filter {
+    it.hasProperty("SUPPORT_FULL_MPP") && it.property("SUPPORT_FULL_MPP")?.toString()?.toBoolean() == true
+}) {
     kotlin {
 //        js {
 //            browser()

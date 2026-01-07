@@ -38,7 +38,7 @@ value class Mnemonic(val words: Array<String>) {
         ): Mnemonic = Entropy(rng(strength.entropyByteSize)).toMnemonic(wordlist)
     }
 
-    constructor(mnemonic: String) : this(mnemonic.split(" ").toTypedArray())
+    constructor(mnemonic: String) : this(mnemonic.split(" ", "　").toTypedArray())
 
     init {
         if (words.size % 3 != 0) {

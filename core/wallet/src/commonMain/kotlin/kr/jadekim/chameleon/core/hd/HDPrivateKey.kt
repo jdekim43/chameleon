@@ -5,7 +5,7 @@ import kotlinx.coroutines.Deferred
 import kr.jadekim.chameleon.core.crypto.secp256k1.Secp256k1
 import kr.jadekim.chameleon.core.hd.schnorr.XOnlyPublicKey
 import kr.jadekim.common.annotation.InDevelopment
-import kr.jadekim.common.encoder.Base58
+import kr.jadekim.common.encoder.Base58WithChecksum
 import kr.jadekim.common.encoder.Hex
 import kr.jadekim.common.encoder.decode
 import kr.jadekim.common.encoder.encode
@@ -25,7 +25,7 @@ open class HDPrivateKey(bytes: ByteArray) {
         const val BYTE_SIZE_UNCOMPRESSED = 32
 
         fun fromBase58(input: String): Pair<UByte, HDPrivateKey> {
-            val decoded = input.decode(Base58)
+            val decoded = input.decode(Base58WithChecksum)
 
             return decoded.first().toUByte() to HDPrivateKey(decoded.sliceArray(1 until decoded.size))
         }
@@ -62,7 +62,7 @@ open class HDPrivateKey(bytes: ByteArray) {
     @InDevelopment
     fun createXOnlyPublicKey(): XOnlyPublicKey = XOnlyPublicKey(createPublicKey())
 
-    fun toBase58(version: UByte): String = (byteArrayOf(version.toByte()) + compressed).encode(Base58)
+    fun toBase58(version: UByte): String = (byteArrayOf(version.toByte()) + compressed).encode(Base58WithChecksum)
 
     fun toHex(): String = uncompressed.encode(Hex)
 

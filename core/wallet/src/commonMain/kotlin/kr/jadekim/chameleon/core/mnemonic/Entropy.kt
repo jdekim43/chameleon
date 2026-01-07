@@ -41,11 +41,11 @@ value class Entropy(val entropy: ByteArray) {
     }
 
     internal fun deriveChecksumBits(): BooleanArray {
-        val ENT = entropy.size * 8
-        val CS = ENT / 32
+        val entropyBitSize = entropy.size * Byte.SIZE_BITS
+        val checksumBitSize = entropyBitSize / 32
         val hash = entropy.hash(SHA_256)
 
-        return hash.sliceArray(0 until CS).toBinary()
+        return hash.toBinary().sliceArray(0 until checksumBitSize)
     }
 }
 

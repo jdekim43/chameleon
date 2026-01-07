@@ -1,6 +1,6 @@
 package kr.jadekim.chameleon.core.wif
 
-import kr.jadekim.common.encoder.Base58
+import kr.jadekim.common.encoder.Base58WithChecksum
 import kr.jadekim.common.encoder.decode
 import kr.jadekim.common.encoder.encode
 import kr.jadekim.common.extension.write
@@ -32,7 +32,7 @@ data class WalletImportFormat(
             return WalletImportFormat(bytes[0].toUByte(), bytes.sliceArray(1 until 33), true)
         }
 
-        fun decode(str: String, version: UByte? = null) = decode(str.decode(Base58), version)
+        fun decode(str: String, version: UByte? = null) = decode(str.decode(Base58WithChecksum), version)
     }
 
     fun toByteArray(): ByteArray {
@@ -51,7 +51,7 @@ data class WalletImportFormat(
         return result
     }
 
-    override fun toString(): String = toByteArray().encode(Base58)
+    override fun toString(): String = toByteArray().encode(Base58WithChecksum)
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

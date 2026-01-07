@@ -1,26 +1,39 @@
 [versions]
-kotlin = "2.2.21"
+kotlin = "2.3.0"
 kotlinx-coroutine = "1.10.2"
 kotlinx-io = "0.8.2"
 dokka = "2.1.0"
 cryptography = "0.5.0"
 jade-common = "3.0.0-beta1"
+acinq-secp256k1 = "0.22.0"
+kotest = "6.0.7"
+ksp = "2.3.4"
+goncalossilva-resources = "0.14.1"
 
 [plugins]
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 dokka-javadoc = { id = "org.jetbrains.dokka-javadoc", version.ref = "dokka" }
 jreleaser = { id = "org.jreleaser", version = "1.20.0" }
+kotest = { id = "io.kotest", version.ref = "kotest" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+goncalossilva-resources = { id = "com.goncalossilva.resources", version.ref = "goncalossilva-resources"}
 
 [libraries]
 kotlinx-coroutine-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinx-coroutine" }
 kotlinx-io-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-io-core", version.ref = "kotlinx-io"}
 cryptography-core = { group = "dev.whyoleg.cryptography", name = "cryptography-core", version.ref = "cryptography" }
 cryptography-provider-optimal = { group = "dev.whyoleg.cryptography", name = "cryptography-provider-optimal", version.ref = "cryptography" }
-acinq-secp256k1 = { group = "fr.acinq.secp256k1", name = "secp256k1-kmp", version = "0.21.0" }
+acinq-secp256k1 = { group = "fr.acinq.secp256k1", name = "secp256k1-kmp", version.ref = "acinq-secp256k1" }
+acinq-secp256k1-jni-jvm = { group = "fr.acinq.secp256k1", name = "secp256k1-kmp-jni-jvm", version.ref = "acinq-secp256k1" }
+acinq-secp256k1-jni-android = { group = "fr.acinq.secp256k1", name = "secp256k1-kmp-jni-android", version.ref = "acinq-secp256k1" }
 web3j-crypto = { group = "org.web3j", name = "crypto", version = "4.9.8" }
 doistx-normalize = { group = "com.doist.x", name = "normalize", version = "1.2.0" }
 jade-common-util = { group = "kr.jadekim", name = "common-util", version.ref = "jade-common" }
 jade-common-encoder = { group = "kr.jadekim", name = "common-encoder", version.ref = "jade-common" }
 jade-common-crypto = { group = "kr.jadekim", name = "common-crypto", version.ref = "jade-common" }
 #web3j-crypto = { group = "", name = "", version = "" }
+kotest-framework-engine = { group = "io.kotest", name = "kotest-framework-engine", version.ref = "kotest" }
+kotest-runner-junit5 = { group = "io.kotest", name = "kotest-runner-junit5", version.ref = "kotest" }
+kotest-assertions-core = { group = "io.kotest", name = "kotest-assertions-core", version.ref = "kotest" }
+goncalossilva-resources = { group = "com.goncalossilva", name = "resources", version.ref = "goncalossilva-resources"}

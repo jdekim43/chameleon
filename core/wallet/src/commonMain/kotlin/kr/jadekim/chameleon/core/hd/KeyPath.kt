@@ -47,7 +47,7 @@ private fun parsePath(path: String): List<UInt> {
     if (polished.isEmpty()) return emptyList()
 
     return polished.split("/")
-        .map { if (it.endsWith(HARDENED_SUFFIX)) it.toUInt().hardened else it.toUInt() }
+        .map { if (it.endsWith(HARDENED_SUFFIX)) it.removeSuffix(HARDENED_SUFFIX.toString()).toUInt().hardened else it.toUInt() }
 }
 
 private fun polishPathString(path: String): String {
