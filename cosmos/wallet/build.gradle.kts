@@ -11,5 +11,8 @@ kotlin {
             implementation(libs.jade.common.encoder)
             implementation(libs.jade.common.crypto)
         }
+        jvmTest.dependencies {
+            implementation(libs.acinq.secp256k1.jni.jvm)
+        }
     }
 }

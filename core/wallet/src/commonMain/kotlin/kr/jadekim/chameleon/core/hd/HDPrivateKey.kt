@@ -12,8 +12,8 @@ import kr.jadekim.common.encoder.encode
 
 open class HDPrivateKey(bytes: ByteArray) {
 
-    val compressed: ByteArray by lazy { if (isCompressed(bytes)) bytes else bytes + 1.toByte() }
-    val uncompressed: ByteArray = if (!isCompressed(bytes)) bytes else bytes.copyOf(BYTE_SIZE_UNCOMPRESSED)
+    val compressed: ByteArray by lazy { uncompressed + 1.toByte() }
+    val uncompressed: ByteArray = if (!isCompressed(bytes)) bytes.copyOf() else bytes.copyOf(BYTE_SIZE_UNCOMPRESSED)
 
     init {
         require(bytes.size == BYTE_SIZE_COMPRESSED || bytes.size == BYTE_SIZE_UNCOMPRESSED) { "Invalid private key size" }

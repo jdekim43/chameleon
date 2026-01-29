@@ -16,7 +16,11 @@ actual class BigDecimal constructor(internal val origin: JvmType) : Number(), Co
 
     override fun toByte(): Byte = origin.toByte()
 
-    override fun toChar(): Char = origin.toChar()
+    @Deprecated(
+        "Direct conversion to Char is deprecated. Use toInt().toChar() or Char constructor instead.\nIf you override toChar() function in your Number inheritor, it's recommended to gradually deprecate the overriding function and then remove it.\nSee https://youtrack.jetbrains.com/issue/KT-46465 for details about the migration",
+        replaceWith = ReplaceWith("this.toInt().toChar()")
+    )
+    override fun toChar(): Char = origin.toInt().toChar()
 
     override fun toDouble(): Double = origin.toDouble()
 

@@ -1,6 +1,17 @@
 package kr.jadekim.chameleon.cosmos.wallet.test
 
-class TerraWalletTest {
+import io.kotest.core.spec.style.FunSpec
+import io.kotest.matchers.shouldBe
+import kr.jadekim.chameleon.core.key.privateKeyHex
+import kr.jadekim.chameleon.cosmos.wallet.CosmosWallet
+
+class TerraWalletTest : FunSpec({
+    test("test1") {
+        val (wallet, mnemonicKey) = CosmosWallet.fromMnemonic(NORMAL.mnemonic)
+
+        mnemonicKey.privateKeyHex.uppercase() shouldBe NORMAL.privateKeyHex
+    }
+}) {
 
 //    @Test
 //    fun succeedValidAddress() {

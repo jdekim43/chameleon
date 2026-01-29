@@ -12,13 +12,13 @@ import kr.jadekim.common.encoder.encode
 open class HDPublicKey(bytes: ByteArray) {
 
     val compressed: ByteArray =
-        if (isCompressed(bytes)) bytes
+        if (isCompressed(bytes)) bytes.copyOf()
         else if (isUncompressed(bytes)) Secp256k1.compressPublicKey(bytes)
         else throw IllegalArgumentException("Invalid public key")
 
     val uncompressed: ByteArray by lazy {
         if (isCompressed(bytes)) Secp256k1.decompressPublicKey(bytes)
-        else if (isUncompressed(bytes)) bytes
+        else if (isUncompressed(bytes)) bytes.copyOf()
         else throw IllegalArgumentException("Invalid public key")
     }
 

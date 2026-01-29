@@ -10,7 +10,7 @@ value class KeyPath(val path: List<UInt>) {
         val EMPTY = KeyPath(emptyList())
 
         internal const val MASTER_ELEMENT_STRING = "m"
-        private const val BIP44_ELEMENT = 44u
+        private val BIP44_ELEMENT = 44u.hardened
 
         fun bip44(coinType: UInt, addressIndex: UInt): KeyPath {
             return KeyPath(listOf(BIP44_ELEMENT, coinType.hardened, addressIndex.hardened))

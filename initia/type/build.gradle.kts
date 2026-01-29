@@ -23,6 +23,10 @@ kotlin {
                 api("kr.jadekim:chameleon-proto-skip-connect:$skipConnectVersion-$chameleonProtoBuildVersion")
                 api("kr.jadekim:chameleon-proto-initia-opinit:$initiaOpinitVersion-$chameleonProtoBuildVersion")
                 api("kr.jadekim:chameleon-proto-initia:$initiaVersion-$chameleonProtoBuildVersion")
+
+                implementation(libs.jade.common.util)
+                implementation(libs.jade.common.encoder)
+                implementation(libs.jade.common.crypto)
             }
         }
 
