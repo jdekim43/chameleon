@@ -1,6 +1,9 @@
 package kr.jadekim.chameleon.core.hd
 
 import kr.jadekim.chameleon.core.hd.KeyPath.Companion.MASTER_ELEMENT_STRING
+import kr.jadekim.chameleon.core.hd.secp256k1.ExtendedPrivateKey
+import kr.jadekim.chameleon.core.hd.secp256k1.HDSecp256k1PrivateKey
+import kr.jadekim.chameleon.core.hd.secp256k1.HDSecp256k1PublicKey
 import kotlin.jvm.JvmInline
 
 @JvmInline
@@ -17,11 +20,26 @@ value class KeyPath(val path: List<UInt>) {
         }
 
         fun bip44(coinType: UInt, account: UInt, change: UInt, addressIndex: UInt): KeyPath {
-            return KeyPath(listOf(BIP44_ELEMENT, coinType.hardened, account.hardened, change.unhardened, addressIndex.unhardened))
+            return KeyPath(
+                listOf(
+                    BIP44_ELEMENT,
+                    coinType.hardened,
+                    account.hardened,
+                    change.unhardened,
+                    addressIndex.unhardened,
+                )
+            )
         }
     }
 
     constructor(path: String) : this(parsePath(path))
+
+    fun derive(seed: ByteArray): Pair<HDSecp256k1PrivateKey, HDSecp256k1PublicKey> {
+        val privateKey = ExtendedPrivateKey.from(seed)
+            .derive(this)
+
+        return privateKey.privateKey to privateKey.publicKey
+    }
 
     fun last(): UInt = if (path.isEmpty()) 0u else path.last()
 
@@ -47,7 +65,10 @@ private fun parsePath(path: String): List<UInt> {
     if (polished.isEmpty()) return emptyList()
 
     return polished.split("/")
-        .map { if (it.endsWith(HARDENED_SUFFIX)) it.removeSuffix(HARDENED_SUFFIX.toString()).toUInt().hardened else it.toUInt() }
+        .map {
+            if (it.endsWith(HARDENED_SUFFIX)) it.removeSuffix(HARDENED_SUFFIX.toString())
+                .toUInt().hardened else it.toUInt()
+        }
 }
 
 private fun polishPathString(path: String): String {

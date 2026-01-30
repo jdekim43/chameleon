@@ -27,7 +27,7 @@ object CosmosAddress {
     }
 
     @JvmStatic
-    fun createAccountAddress(key: CosmosSecp256k1PublicKey): Address = Bech32Address(Hrp.ACCOUNT.value, key.toAddress())
+    fun createAccountAddress(key: CosmosSecp256k1PublicKey): Address = Bech32Address(Hrp.ACCOUNT.value, key.toAddressBytes())
 
     @JvmStatic
     fun createAccountPublicKeyAddress(key: CosmosSecp256k1PublicKey): Address = Bech32Address(
@@ -37,7 +37,7 @@ object CosmosAddress {
 
     @JvmStatic
     fun createConsensusAddress(key: CosmosEd25519PublicKey): Address =
-        Bech32Address(Hrp.CONSENSUS_NODE.value, key.toAddress())
+        Bech32Address(Hrp.CONSENSUS_NODE.value, key.toAddressBytes())
 
     @JvmStatic
     fun isValidAddress(address: String, expectedHrps: List<String>? = Hrp.entries.map { it.value }): Boolean = try {

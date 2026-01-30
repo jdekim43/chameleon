@@ -1,7 +1,6 @@
 package kr.jadekim.chameleon.terra.key
 
 import kr.jadekim.chameleon.core.hd.KeyPath
-import kr.jadekim.chameleon.core.hd.secp256k1.ExtendedPrivateKey
 import kr.jadekim.chameleon.core.hd.secp256k1.HDSecp256k1PrivateKey
 import kr.jadekim.chameleon.core.hd.secp256k1.HDSecp256k1PublicKey
 import kr.jadekim.chameleon.core.key.BIP44Aware
@@ -32,8 +31,7 @@ open class TerraMnemonicKey private constructor(
             password: String? = null,
         ): TerraMnemonicKey {
             val seed = mnemonic.toSeed(password)
-            val privateKey = ExtendedPrivateKey.from(seed)
-                .derive(KeyPath.bip44(coinType, account, change, index))
+            val (privateKey, publicKey) = KeyPath.bip44(coinType, account, change, index).derive(seed)
 
             return TerraMnemonicKey(
                 mnemonic,
@@ -42,8 +40,8 @@ open class TerraMnemonicKey private constructor(
                 account,
                 index,
                 password,
-                privateKey.privateKey,
-                privateKey.publicKey,
+                privateKey,
+                publicKey,
             )
         }
     }

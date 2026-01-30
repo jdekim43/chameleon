@@ -27,7 +27,7 @@ object TerraAddress {
 
     @JvmStatic
     fun createAccountAddress(key: TerraSecp256k1PublicKey): Address = Bech32Address(
-        Hrp.ACCOUNT.value, key.toAddress()
+        Hrp.ACCOUNT.value, key.toAddressBytes()
     )
 
     @JvmStatic
@@ -38,7 +38,7 @@ object TerraAddress {
 
     @JvmStatic
     fun createConsensusAddress(key: TerraSecp256k1PublicKey): Address =
-        Bech32Address(Hrp.CONSENSUS_NODE.value, key.toAddress())
+        Bech32Address(Hrp.CONSENSUS_NODE.value, key.toAddressBytes())
 
     @JvmStatic
     fun isValidAddress(address: String, expectedHrps: List<String>? = Hrp.entries.map { it.value }): Boolean = try {

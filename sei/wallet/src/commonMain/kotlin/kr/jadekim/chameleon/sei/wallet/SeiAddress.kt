@@ -29,7 +29,7 @@ object SeiAddress {
     @JvmStatic
     fun createAccountAddress(key: SeiSecp256k1PublicKey): Address = Bech32Address(
         Hrp.ACCOUNT.value,
-        key.toAddress(),
+        key.toAddressBytes(),
     )
 
     @JvmStatic
@@ -41,7 +41,7 @@ object SeiAddress {
     @JvmStatic
     fun createConsensusAddress(key: SeiEd25519PublicKey): Address = Bech32Address(
         Hrp.CONSENSUS_NODE.value,
-        key.toAddress(),
+        key.toAddressBytes(),
     )
 
     @JvmStatic

@@ -28,7 +28,7 @@ object InjectiveAddress {
 
     @JvmStatic
     fun createAccountAddress(key: InjectiveSecp256k1PublicKey): Address =
-        Bech32Address(Hrp.ACCOUNT.value, key.toAddress())
+        Bech32Address(Hrp.ACCOUNT.value, key.toAddressBytes())
 
     @JvmStatic
     fun createAccountPublicKeyAddress(key: InjectiveSecp256k1PublicKey): Address = Bech32Address(
@@ -39,7 +39,7 @@ object InjectiveAddress {
     @JvmStatic
     fun createConsensusAddress(key: InjectiveEd25519PublicKey): Address = Bech32Address(
         Hrp.CONSENSUS_NODE.value,
-        key.toAddress(),
+        key.toAddressBytes(),
     )
 
     @JvmStatic
