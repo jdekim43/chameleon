@@ -1,44 +1,29 @@
-package kr.jadekim.chameleon.core.hd
+package kr.jadekim.chameleon.core.hd.secp256k1
 
-import kr.jadekim.chameleon.core.wif.WalletImportFormat
+import kr.jadekim.chameleon.core.hd.KeyPath
+import kr.jadekim.chameleon.core.hd.isHardened
 import kr.jadekim.common.crypto.mac.HMAC_SHA_512
 import kr.jadekim.common.crypto.mac.hash
 import kr.jadekim.common.encoder.Base58WithChecksum
 import kr.jadekim.common.encoder.decode
 import kr.jadekim.common.encoder.encode
 import kr.jadekim.common.extension.toUIntWithinBigEndian
-import kr.jadekim.common.extension.utf8
 import kr.jadekim.common.extension.write
 
-data class ExtendedPrivateKey(
-    val privateKey: HDPrivateKey,
+internal data class ExtendedPublicKey(
+    val publicKey: HDSecp256k1PublicKey,
     val chainCode: ByteArray,
     val depth: UByte,
     val path: KeyPath,
-    val parentFingerprint: UInt
+    val parentFingerprint: UInt,
 ) {
 
     companion object {
-        fun from(seed: ByteArray): ExtendedPrivateKey {
-            if (seed.size < 16) {
-                throw IllegalArgumentException("Seed should be at least 128 bits")
-            }
-            if (seed.size > 64) {
-                throw IllegalArgumentException("Seed should be at most 512 bits")
-            }
-
-            val I = seed.hash(HMAC_SHA_512, "Bitcoin seed".utf8())
-            val IL = I.sliceArray(0 until 32)
-            val IR = I.sliceArray(32 until I.size)
-
-            return ExtendedPrivateKey(HDPrivateKey(IL), IR, 0u, KeyPath.EMPTY, 0u)
-        }
-
         fun fromBase58(
             input: String,
             checkVersion: (UInt) -> Boolean,
-            parentPath: KeyPath = KeyPath.EMPTY
-        ): Pair<UInt, ExtendedPrivateKey> {
+            parentPath: KeyPath = KeyPath.Companion.EMPTY
+        ): Pair<UInt, ExtendedPublicKey> {
             val decoded = input.decode(Base58WithChecksum)
             if (decoded.size != 78) {
                 throw IllegalArgumentException("Invalid length")
@@ -61,14 +46,10 @@ data class ExtendedPrivateKey(
 
             val chainCode = decoded.sliceArray(13 until 45)
 
-            if (decoded[45] != 0x0.toByte()) {
-                throw IllegalArgumentException("Invalid private key")
-            }
+            val publicKey = decoded.sliceArray(45 until 78)
 
-            val privateKey = decoded.sliceArray(46 until 78)
-
-            return version to ExtendedPrivateKey(
-                HDPrivateKey(privateKey),
+            return version to ExtendedPublicKey(
+                HDSecp256k1PublicKey(publicKey),
                 chainCode,
                 depth,
                 parentPath + index,
@@ -79,47 +60,46 @@ data class ExtendedPrivateKey(
 
     val index = path.last()
 
-    val publicKey = privateKey.createPublicKey()
-    val extendedPublicKey = ExtendedPublicKey(publicKey, chainCode, depth, path, parentFingerprint)
-
-    val fingerprint: UInt by lazy { extendedPublicKey.fingerprint }
+    val fingerprint: UInt by lazy { publicKey.hash160.sliceArray(0 until 4).toUIntWithinBigEndian() }
 
     init {
-        require(privateKey.isValid()) { "Invalid private key" }
+        require(publicKey.isValid()) { "Invalid public key" }
         require(depth != 0.toUByte() || parentFingerprint == 0u) { "zero depth with non-zero parent fingerprint" }
         require(depth != 0.toUByte() || index == 0u) { "zero depth with non-zero child number" }
     }
 
-    fun derive(index: UInt): ExtendedPrivateKey {
+    fun derive(index: UInt): ExtendedPublicKey {
+        require(!index.isHardened) { "Cannot derive public keys from public hardened keys" }
+
         val data = ByteArray(37).apply {
-            if (index.isHardened) {
-                write(0, 0.toByte())
-                write(1, privateKey.uncompressed)
-                write(33, index)
-            } else {
-                write(0, publicKey.compressed)
-                write(33, index)
-            }
+            write(0, publicKey.compressed)
+            write(33, index)
         }
 
         val I = data.hash(HMAC_SHA_512, chainCode)
         val IL = I.sliceArray(0 until 32)
         val IR = I.sliceArray(32 until I.size)
 
-        var newPrivateKey = HDPrivateKey(IL)
-        require(newPrivateKey.isValid()) { "cannot generate child private key: IL is invalid" }
+        val newPrivateKey = HDSecp256k1PrivateKey(IL)
+        require(newPrivateKey.isValid()) { "cannot generate child public key: IL is invalid" }
 
-        newPrivateKey += privateKey
-        require(newPrivateKey.isValid()) { "cannot generate child private key: resulting private key is invalid" }
+        val newPublicKey = newPrivateKey.createPublicKey() + publicKey
+        require(newPublicKey.isValid()) { "cannot generate child public key: resulting public key is invalid" }
 
-        return ExtendedPrivateKey(newPrivateKey, IR, depth.inc(), path + index, fingerprint)
+        return ExtendedPublicKey(
+            newPublicKey,
+            IR,
+            depth.inc(),
+            path + index,
+            fingerprint
+        )
     }
 
-    fun derive(path: List<UInt>): ExtendedPrivateKey = path.fold(this) { acc, index -> acc.derive(index) }
+    fun derive(path: List<UInt>): ExtendedPublicKey = path.fold(this) { acc, index -> acc.derive(index) }
 
-    fun derive(path: KeyPath): ExtendedPrivateKey = derive(path.path)
+    fun derive(path: KeyPath): ExtendedPublicKey = derive(path.path)
 
-    fun derive(path: String): ExtendedPrivateKey = derive(KeyPath(path))
+    fun derive(path: String): ExtendedPublicKey = derive(KeyPath(path))
 
     fun toBase58(version: UInt): String = ByteArray(78).apply {
         write(0, version)
@@ -127,21 +107,16 @@ data class ExtendedPrivateKey(
         write(5, parentFingerprint)
         write(9, index)
         write(13, chainCode)
-        write(45, 0)
-        write(46, privateKey.uncompressed)
+        write(45, publicKey.compressed)
     }.encode(Base58WithChecksum)
-
-    fun toWIF(version: UByte): String = WalletImportFormat(version, privateKey.uncompressed, true).toString()
-
-    override fun toString(): String = "<extended_private_key>"
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other == null || this::class != other::class) return false
 
-        other as ExtendedPrivateKey
+        other as ExtendedPublicKey
 
-        if (privateKey != other.privateKey) return false
+        if (publicKey != other.publicKey) return false
         if (!chainCode.contentEquals(other.chainCode)) return false
         if (depth != other.depth) return false
         if (path != other.path) return false
@@ -151,7 +126,7 @@ data class ExtendedPrivateKey(
     }
 
     override fun hashCode(): Int {
-        var result = privateKey.hashCode()
+        var result = publicKey.hashCode()
         result = 31 * result + chainCode.contentHashCode()
         result = 31 * result + depth.hashCode()
         result = 31 * result + path.hashCode()

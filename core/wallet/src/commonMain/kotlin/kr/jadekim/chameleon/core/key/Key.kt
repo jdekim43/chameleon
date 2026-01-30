@@ -8,6 +8,8 @@ interface Key
 interface PublicKey : Key, Verifier {
 
     val publicKey: ByteArray
+
+    fun toAddressBytes(): ByteArray
 }
 
 val PublicKey.publicKeyHex: String

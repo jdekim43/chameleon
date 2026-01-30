@@ -1,9 +1,9 @@
 package kr.jadekim.chameleon.initia.key
 
-import kr.jadekim.chameleon.core.hd.ExtendedPrivateKey
-import kr.jadekim.chameleon.core.hd.HDPrivateKey
-import kr.jadekim.chameleon.core.hd.HDPublicKey
 import kr.jadekim.chameleon.core.hd.KeyPath
+import kr.jadekim.chameleon.core.hd.secp256k1.ExtendedPrivateKey
+import kr.jadekim.chameleon.core.hd.secp256k1.HDSecp256k1PrivateKey
+import kr.jadekim.chameleon.core.hd.secp256k1.HDSecp256k1PublicKey
 import kr.jadekim.chameleon.core.key.BIP44Aware
 import kr.jadekim.chameleon.core.key.MnemonicAware
 import kr.jadekim.chameleon.core.mnemonic.Mnemonic
@@ -15,8 +15,8 @@ open class InitiaEtherMnemonicKey private constructor(
     override val change: UInt = CHANGE,
     override val index: UInt = 0u,
     override val password: String? = null,
-    privateKey: HDPrivateKey,
-    publicKey: HDPublicKey,
+    privateKey: HDSecp256k1PrivateKey,
+    publicKey: HDSecp256k1PublicKey,
 ) : BIP44Aware, MnemonicAware, InitiaEtherSecp256k1PrivateKey(privateKey, publicKey) {
 
     companion object {

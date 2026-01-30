@@ -3,7 +3,7 @@ package kr.jadekim.chameleon.core.mnemonic
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
 import kr.jadekim.chameleon.core.hd.Bip32TestData.VERSION_MAINNET_PRIVATE
-import kr.jadekim.chameleon.core.hd.ExtendedPrivateKey
+import kr.jadekim.chameleon.core.hd.secp256k1.ExtendedPrivateKey
 import kr.jadekim.chameleon.core.mnemonic.wordlist.*
 import kr.jadekim.common.encoder.Hex
 import kr.jadekim.common.encoder.decode

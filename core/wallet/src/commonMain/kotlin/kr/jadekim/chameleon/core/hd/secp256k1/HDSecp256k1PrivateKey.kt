@@ -1,16 +1,16 @@
-package kr.jadekim.chameleon.core.hd
+package kr.jadekim.chameleon.core.hd.secp256k1
 
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
 import kr.jadekim.chameleon.core.crypto.secp256k1.Secp256k1
-import kr.jadekim.chameleon.core.hd.schnorr.XOnlyPublicKey
+import kr.jadekim.chameleon.core.hd.secp256k1.schnorr.XOnlyPublicKey
 import kr.jadekim.common.annotation.InDevelopment
 import kr.jadekim.common.encoder.Base58WithChecksum
 import kr.jadekim.common.encoder.Hex
 import kr.jadekim.common.encoder.decode
 import kr.jadekim.common.encoder.encode
 
-open class HDPrivateKey(bytes: ByteArray) {
+open class HDSecp256k1PrivateKey(bytes: ByteArray) {
 
     val compressed: ByteArray by lazy { uncompressed + 1.toByte() }
     val uncompressed: ByteArray = if (!isCompressed(bytes)) bytes.copyOf() else bytes.copyOf(BYTE_SIZE_UNCOMPRESSED)
@@ -24,32 +24,32 @@ open class HDPrivateKey(bytes: ByteArray) {
         const val BYTE_SIZE_COMPRESSED = 33
         const val BYTE_SIZE_UNCOMPRESSED = 32
 
-        fun fromBase58(input: String): Pair<UByte, HDPrivateKey> {
+        fun fromBase58(input: String): Pair<UByte, HDSecp256k1PrivateKey> {
             val decoded = input.decode(Base58WithChecksum)
 
-            return decoded.first().toUByte() to HDPrivateKey(decoded.sliceArray(1 until decoded.size))
+            return decoded.first().toUByte() to HDSecp256k1PrivateKey(decoded.sliceArray(1 until decoded.size))
         }
 
-        fun fromHex(input: String): HDPrivateKey = HDPrivateKey(input.decode(Hex))
+        fun fromHex(input: String): HDSecp256k1PrivateKey = HDSecp256k1PrivateKey(input.decode(Hex))
 
         fun isCompressed(bytes: ByteArray): Boolean = bytes.size == BYTE_SIZE_COMPRESSED && bytes.last() == 1.toByte()
     }
 
-    operator fun plus(that: HDPrivateKey): HDPrivateKey =
-        HDPrivateKey(Secp256k1.privateKeyTweakAdd(uncompressed, that.uncompressed))
+    operator fun plus(that: HDSecp256k1PrivateKey): HDSecp256k1PrivateKey =
+        HDSecp256k1PrivateKey(Secp256k1.privateKeyTweakAdd(uncompressed, that.uncompressed))
 
-    operator fun unaryMinus(): HDPrivateKey = HDPrivateKey(Secp256k1.privateKeyNegate(uncompressed))
+    operator fun unaryMinus(): HDSecp256k1PrivateKey = HDSecp256k1PrivateKey(Secp256k1.privateKeyNegate(uncompressed))
 
-    operator fun minus(that: HDPrivateKey): HDPrivateKey = plus(-that)
+    operator fun minus(that: HDSecp256k1PrivateKey): HDSecp256k1PrivateKey = plus(-that)
 
-    operator fun times(that: HDPrivateKey): HDPrivateKey =
-        HDPrivateKey(Secp256k1.privateKeyTweakMul(uncompressed, that.uncompressed))
+    operator fun times(that: HDSecp256k1PrivateKey): HDSecp256k1PrivateKey =
+        HDSecp256k1PrivateKey(Secp256k1.privateKeyTweakMul(uncompressed, that.uncompressed))
 
     fun sign(message: ByteArray): Deferred<ByteArray> = CompletableDeferred(signSync(message))
 
     fun signSync(message: ByteArray): ByteArray = Secp256k1.sign(message, uncompressed)
 
-    fun tweak(tweak: HDPrivateKey): HDPrivateKey {
+    fun tweak(tweak: HDSecp256k1PrivateKey): HDSecp256k1PrivateKey {
         val key = if (createPublicKey().isEven()) this else -this
 
         return key + tweak
@@ -57,7 +57,7 @@ open class HDPrivateKey(bytes: ByteArray) {
 
     fun isValid(): Boolean = Secp256k1.isValidPrivateKey(uncompressed)
 
-    fun createPublicKey(): HDPublicKey = HDPublicKey(Secp256k1.createPublicKey(uncompressed))
+    fun createPublicKey(): HDSecp256k1PublicKey = HDSecp256k1PublicKey(Secp256k1.createPublicKey(uncompressed))
 
     @InDevelopment
     fun createXOnlyPublicKey(): XOnlyPublicKey = XOnlyPublicKey(createPublicKey())
@@ -72,7 +72,7 @@ open class HDPrivateKey(bytes: ByteArray) {
         if (this === other) return true
         if (other == null || this::class != other::class) return false
 
-        other as HDPrivateKey
+        other as HDSecp256k1PrivateKey
 
         return !uncompressed.contentEquals(other.uncompressed)
     }

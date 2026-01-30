@@ -6,6 +6,8 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.startWith
 import kr.jadekim.chameleon.core.hd.Bip32TestData.VERSION_MAINNET_PRIVATE
 import kr.jadekim.chameleon.core.hd.Bip32TestData.VERSION_MAINNET_PUBLIC
+import kr.jadekim.chameleon.core.hd.secp256k1.ExtendedPrivateKey
+import kr.jadekim.chameleon.core.hd.secp256k1.ExtendedPublicKey
 import kr.jadekim.common.encoder.Hex
 import kr.jadekim.common.encoder.decode
 

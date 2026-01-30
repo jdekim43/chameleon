@@ -12,5 +12,6 @@ open class InjectiveEd25519PublicKey(override val publicKey: ByteArray) : Public
         TODO("Not yet implemented")
     }
 
-    fun toAddress(): ByteArray = publicKey.hash(SHA_256).sliceArray(0 until ADDRESS_TRUNCATE_LENGTH)
+    override fun toAddressBytes(): ByteArray = publicKey.hash(SHA_256)
+        .sliceArray(0 until ADDRESS_TRUNCATE_LENGTH)
 }
