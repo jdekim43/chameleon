@@ -65,14 +65,14 @@ repositories {
 
 dependencies {
     // Core wallet functionality
-    implementation("kr.jadekim:chameleon-core-wallet:0.6.0-beta2")
+    implementation("kr.jadekim:chameleon-core-wallet:$chameleonVersion")
 
     // For Cosmos blockchain
-    implementation("kr.jadekim:chameleon-cosmos-wallet:0.6.0-beta2")
-    implementation("kr.jadekim:chameleon-cosmos-tool:0.6.0-beta2")
+    implementation("kr.jadekim:chameleon-cosmos-wallet:$chameleonVersion")
+    implementation("kr.jadekim:chameleon-cosmos-tool:$chameleonVersion")
 
     // For Terra blockchain
-    implementation("kr.jadekim:chameleon-terra-wallet:0.6.0-beta2")
+    implementation("kr.jadekim:chameleon-terra-wallet:$chameleonVersion")
 
     // Add other blockchain modules as needed
 }
@@ -84,7 +84,7 @@ dependencies {
 <dependency>
     <groupId>kr.jadekim</groupId>
     <artifactId>chameleon-core-wallet</artifactId>
-    <version>0.6.0-beta2</version>
+    <version>${chameleonVersion}</version>
 </dependency>
 ```
 
