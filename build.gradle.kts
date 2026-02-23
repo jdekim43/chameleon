@@ -21,7 +21,7 @@ allprojects {
     }
 
     group = "kr.jadekim"
-    version = "0.6.0-beta1"
+    version = "0.6.0-beta2"
 }
 
 configure(allprojects.filter { !it.hasProperty("IGNORE_GLOBAL_CONFIGURATION") }) {
@@ -35,7 +35,7 @@ configure(allprojects.filter { !it.hasProperty("IGNORE_GLOBAL_CONFIGURATION") })
     }
 
     kotlin {
-        jvmToolchain(21)
+        jvmToolchain(11)
         jvm {
             testRuns["test"].executionTask.configure {
                 useJUnitPlatform()
@@ -135,6 +135,20 @@ jreleaser {
                     subprojects.forEach {
                         stagingRepository(it.layout.buildDirectory.dir("staging-deploy").get().asFile.absolutePath)
                     }
+
+                    subprojects.filter {
+                        it.hasProperty("SUPPORT_FULL_MPP") && it.property("SUPPORT_FULL_MPP")?.toString()?.toBoolean() == true
+                    }.forEach { p ->
+                        listOf("iosarm64", "iossimulatorarm64").forEach { target ->
+                            artifactOverride {
+                                artifactId = "${p.name}-$target"
+                                jar = false
+                                verifyPom = false
+                                sourceJar = false
+                                javadocJar = false
+                            }
+                        }
+                    }
                 }
             }
             nexus2 {
@@ -150,6 +164,20 @@ jreleaser {
                     subprojects.forEach {
                         stagingRepository(it.layout.buildDirectory.dir("staging-deploy").get().asFile.absolutePath)
                     }
+
+                    subprojects.filter {
+                        it.hasProperty("SUPPORT_FULL_MPP") && it.property("SUPPORT_FULL_MPP")?.toString()?.toBoolean() == true
+                    }.forEach { p ->
+                        listOf("iosarm64", "iossimulatorarm64").forEach { target ->
+                            artifactOverride {
+                                artifactId = "${p.name}-$target"
+                                jar = false
+                                verifyPom = false
+                                sourceJar = false
+                                javadocJar = false
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -162,18 +190,19 @@ jreleaser {
     }
 }
 
-tasks.named("publish") {
-    doFirst {
-        layout.buildDirectory.dir("staging-deploy").get().asFile.delete()
-
-        subprojects.forEach {
-            it.layout.buildDirectory.dir("staging-deploy").get().asFile.delete()
-        }
-    }
+val clearStagingDirectory = tasks.create<Delete>("clearStagingDirectory") {
+    delete(layout.buildDirectory.dir("staging-deploy"))
 
     subprojects.forEach {
-        dependsOn(":${it.path}:publish")
+        delete(it.layout.buildDirectory.dir("staging-deploy"))
+    }
+}
+
+tasks.named("publish") {
+    subprojects.forEach {
+        val publishTask = it.tasks.named("publish")
+        dependsOn(publishTask)
     }
 
-    finalizedBy(":jreleaserFullRelease")
+    finalizedBy(":jreleaserFullRelease", clearStagingDirectory)
 }
