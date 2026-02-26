@@ -6,6 +6,8 @@ include(
     ":core:tool",
     ":core:type",
     ":core:wallet",
+    ":ethereum",
+    ":ethereum:wallet",
     ":cosmos",
     ":cosmos:type",
     ":cosmos:tool",
