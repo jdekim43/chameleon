@@ -1,8 +1,7 @@
 package kr.jadekim.chameleon.cosmos.key
 
+import kr.jadekim.chameleon.core.hd.Curve
 import kr.jadekim.chameleon.core.hd.KeyPath
-import kr.jadekim.chameleon.core.hd.secp256k1.HDSecp256k1PrivateKey
-import kr.jadekim.chameleon.core.hd.secp256k1.HDSecp256k1PublicKey
 import kr.jadekim.chameleon.core.key.BIP44Aware
 import kr.jadekim.chameleon.core.key.MnemonicAware
 import kr.jadekim.chameleon.core.mnemonic.Mnemonic
@@ -14,9 +13,8 @@ open class CosmosMnemonicKey private constructor(
     override val change: UInt = CHANGE,
     override val index: UInt = 0u,
     override val password: String? = null,
-    privateKey: HDSecp256k1PrivateKey,
-    publicKey: HDSecp256k1PublicKey,
-) : BIP44Aware, MnemonicAware, CosmosSecp256k1PrivateKey(privateKey, publicKey) {
+    privateKey: ByteArray,
+) : BIP44Aware, MnemonicAware, CosmosPrivateKey(privateKey) {
 
     companion object {
         const val COIN_TYPE = 118u
@@ -31,7 +29,7 @@ open class CosmosMnemonicKey private constructor(
             password: String? = null,
         ): CosmosMnemonicKey {
             val seed = mnemonic.toSeed(password)
-            val (privateKey, publicKey) = KeyPath.bip44(coinType, account, change, index).derive(seed)
+            val privateKey = KeyPath.bip44(coinType, account, change, index).derive(seed, Curve.Secp256k1)
 
             return CosmosMnemonicKey(
                 mnemonic,
@@ -40,8 +38,7 @@ open class CosmosMnemonicKey private constructor(
                 account,
                 index,
                 password,
-                privateKey,
-                publicKey,
+                privateKey.bytes,
             )
         }
     }

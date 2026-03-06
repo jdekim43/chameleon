@@ -4,9 +4,9 @@ import kr.jadekim.chameleon.core.crypto.bech32.Bech32
 import kr.jadekim.chameleon.core.wallet.Address
 import kr.jadekim.chameleon.core.wallet.Bech32Address
 import kr.jadekim.chameleon.core.wallet.HexAddress
+import kr.jadekim.chameleon.initia.key.InitiaCosmosPublicKey
 import kr.jadekim.chameleon.initia.key.InitiaEd25519PublicKey
-import kr.jadekim.chameleon.initia.key.InitiaEtherSecp256k1PublicKey
-import kr.jadekim.chameleon.initia.key.InitiaSecp256k1PublicKey
+import kr.jadekim.chameleon.initia.key.InitiaEtherPublicKey
 import kr.jadekim.common.encoder.Hex
 import kr.jadekim.common.encoder.decode
 import kotlin.jvm.JvmStatic
@@ -30,22 +30,22 @@ object InitiaAddress {
     }
 
     @JvmStatic
-    fun createAccountAddress(key: InitiaSecp256k1PublicKey): Address = Bech32Address(Hrp.ACCOUNT.value, key.toAddressBytes())
+    fun createAccountAddress(key: InitiaCosmosPublicKey): Address = Bech32Address(Hrp.ACCOUNT.value, key.toAddressBytes())
 
     @JvmStatic
-    fun createAccountAddress(key: InitiaEtherSecp256k1PublicKey): Address =
+    fun createAccountAddress(key: InitiaEtherPublicKey): Address =
         Bech32Address(Hrp.ACCOUNT.value, key.toAddressBytes())
 
     @JvmStatic
-    fun createAccountEtherAddress(key: InitiaSecp256k1PublicKey): Address = HexAddress(key.toAddressBytes())
+    fun createAccountEtherAddress(key: InitiaCosmosPublicKey): Address = HexAddress(key.toAddressBytes())
 
     @JvmStatic
-    fun createAccountEtherAddress(key: InitiaEtherSecp256k1PublicKey): Address = HexAddress(key.toAddressBytes())
+    fun createAccountEtherAddress(key: InitiaEtherPublicKey): Address = HexAddress(key.toAddressBytes())
 
     @JvmStatic
-    fun createAccountPublicKeyAddress(key: InitiaSecp256k1PublicKey): Address = Bech32Address(
+    fun createAccountPublicKeyAddress(key: InitiaCosmosPublicKey): Address = Bech32Address(
         Hrp.ACCOUNT_PUBLIC_KEY.value,
-        "eb5ae98721".decode(Hex) + key.publicKey,
+        "eb5ae98721".decode(Hex) + key.bytes,
     )
 
     @JvmStatic

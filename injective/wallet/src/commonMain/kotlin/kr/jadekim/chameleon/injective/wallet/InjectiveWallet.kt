@@ -1,16 +1,21 @@
 package kr.jadekim.chameleon.injective.wallet
 
-import kr.jadekim.chameleon.core.key.Key
+import kr.jadekim.chameleon.core.key.PrivateKey
+import kr.jadekim.chameleon.core.key.PublicKey
 import kr.jadekim.chameleon.core.mnemonic.Mnemonic
 import kr.jadekim.chameleon.core.wallet.Address
 import kr.jadekim.chameleon.core.wallet.Wallet
 import kr.jadekim.chameleon.injective.key.InjectiveMnemonicKey
-import kr.jadekim.chameleon.injective.key.InjectiveSecp256k1PrivateKey
-import kr.jadekim.chameleon.injective.key.InjectiveSecp256k1PublicKey
+import kr.jadekim.chameleon.injective.key.InjectivePrivateKey
+import kr.jadekim.chameleon.injective.key.InjectivePublicKey
 import kotlin.jvm.JvmOverloads
 import kotlin.jvm.JvmStatic
 
-class InjectiveWallet(override val address: Address, override val key: Key? = null) : Wallet {
+class InjectiveWallet(
+    override val address: Address,
+    override val privateKey: PrivateKey? = null,
+    override val publicKey: PublicKey? = privateKey?.createPublicKey(),
+) : Wallet {
 
     companion object {
 
@@ -39,16 +44,17 @@ class InjectiveWallet(override val address: Address, override val key: Key? = nu
             index: UInt = 0u,
             password: String? = null,
         ) = create(Mnemonic(mnemonic), coinType, account, change, index, password)
-
-        @JvmStatic
-        @JvmOverloads
-        fun fromKeyPair(
-            privateKey: ByteArray,
-            publicKey: ByteArray? = null,
-        ) = InjectiveWallet(InjectiveSecp256k1PrivateKey(privateKey, publicKey))
     }
 
-    constructor(key: InjectiveSecp256k1PublicKey) : this(InjectiveAddress.createAccountAddress(key), key)
+    constructor(
+        publicKey: InjectivePublicKey,
+        privateKey: InjectivePrivateKey? = null
+    ) : this(InjectiveAddress.createAccountAddress(publicKey), privateKey, publicKey)
 
-    constructor(publicKey: ByteArray) : this(InjectiveSecp256k1PublicKey(publicKey))
+    constructor(privateKey: InjectivePrivateKey) : this(privateKey.createPublicKey(), privateKey)
+
+    constructor(publicKey: ByteArray, privateKey: ByteArray? = null) : this(
+        InjectivePublicKey(publicKey),
+        privateKey?.let { InjectivePrivateKey(it) },
+    )
 }

@@ -1,16 +1,21 @@
 package kr.jadekim.chameleon.ethereum.wallet
 
-import kr.jadekim.chameleon.core.key.Key
+import kr.jadekim.chameleon.core.key.PrivateKey
+import kr.jadekim.chameleon.core.key.PublicKey
 import kr.jadekim.chameleon.core.mnemonic.Mnemonic
 import kr.jadekim.chameleon.core.wallet.Address
 import kr.jadekim.chameleon.core.wallet.Wallet
 import kr.jadekim.chameleon.ethereum.key.EthereumMnemonicKey
-import kr.jadekim.chameleon.ethereum.key.EthereumSecp256k1PrivateKey
-import kr.jadekim.chameleon.ethereum.key.EthereumSecp256k1PublicKey
+import kr.jadekim.chameleon.ethereum.key.EthereumPrivateKey
+import kr.jadekim.chameleon.ethereum.key.EthereumPublicKey
 import kotlin.jvm.JvmOverloads
 import kotlin.jvm.JvmStatic
 
-class EthereumWallet(override val address: Address, override val key: Key? = null) : Wallet {
+class EthereumWallet(
+    override val address: Address,
+    override val privateKey: PrivateKey? = null,
+    override val publicKey: PublicKey? = privateKey?.createPublicKey(),
+) : Wallet {
 
     companion object {
 
@@ -39,16 +44,17 @@ class EthereumWallet(override val address: Address, override val key: Key? = nul
             index: UInt = 0u,
             password: String? = null,
         ) = create(Mnemonic(mnemonic), coinType, account, change, index, password)
-
-        @JvmStatic
-        @JvmOverloads
-        fun fromKeyPair(
-            privateKey: ByteArray,
-            publicKey: ByteArray? = null,
-        ) = EthereumWallet(EthereumSecp256k1PrivateKey(privateKey, publicKey))
     }
 
-    constructor(key: EthereumSecp256k1PublicKey) : this(EthereumAddress.createAccountAddress(key), key)
+    constructor(
+        publicKey: EthereumPublicKey,
+        privateKey: EthereumPrivateKey? = null
+    ) : this(EthereumAddress.createAccountAddress(publicKey), privateKey, publicKey)
 
-    constructor(publicKey: ByteArray) : this(EthereumSecp256k1PublicKey(publicKey))
+    constructor(privateKey: EthereumPrivateKey) : this(privateKey.createPublicKey(), privateKey)
+
+    constructor(publicKey: ByteArray, privateKey: ByteArray? = null) : this(
+        EthereumPublicKey(publicKey),
+        privateKey?.let { EthereumPrivateKey(it) },
+    )
 }

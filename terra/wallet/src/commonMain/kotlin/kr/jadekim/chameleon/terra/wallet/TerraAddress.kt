@@ -3,7 +3,7 @@ package kr.jadekim.chameleon.terra.wallet
 import kr.jadekim.chameleon.core.crypto.bech32.Bech32
 import kr.jadekim.chameleon.core.wallet.Address
 import kr.jadekim.chameleon.core.wallet.Bech32Address
-import kr.jadekim.chameleon.terra.key.TerraSecp256k1PublicKey
+import kr.jadekim.chameleon.terra.key.TerraPublicKey
 import kr.jadekim.common.encoder.Hex
 import kr.jadekim.common.encoder.decode
 import kotlin.jvm.JvmStatic
@@ -26,18 +26,18 @@ object TerraAddress {
     }
 
     @JvmStatic
-    fun createAccountAddress(key: TerraSecp256k1PublicKey): Address = Bech32Address(
+    fun createAccountAddress(key: TerraPublicKey): Address = Bech32Address(
         Hrp.ACCOUNT.value, key.toAddressBytes()
     )
 
     @JvmStatic
-    fun createAccountPublicKeyAddress(key: TerraSecp256k1PublicKey): Address = Bech32Address(
+    fun createAccountPublicKeyAddress(key: TerraPublicKey): Address = Bech32Address(
         Hrp.ACCOUNT_PUBLIC_KEY.value,
-        "eb5ae98721".decode(Hex) + key.publicKey,
+        "eb5ae98721".decode(Hex) + key.bytes,
     )
 
     @JvmStatic
-    fun createConsensusAddress(key: TerraSecp256k1PublicKey): Address =
+    fun createConsensusAddress(key: TerraPublicKey): Address =
         Bech32Address(Hrp.CONSENSUS_NODE.value, key.toAddressBytes())
 
     @JvmStatic

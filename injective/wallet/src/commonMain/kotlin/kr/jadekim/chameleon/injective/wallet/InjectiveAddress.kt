@@ -4,7 +4,7 @@ import kr.jadekim.chameleon.core.crypto.bech32.Bech32
 import kr.jadekim.chameleon.core.wallet.Address
 import kr.jadekim.chameleon.core.wallet.Bech32Address
 import kr.jadekim.chameleon.injective.key.InjectiveEd25519PublicKey
-import kr.jadekim.chameleon.injective.key.InjectiveSecp256k1PublicKey
+import kr.jadekim.chameleon.injective.key.InjectivePublicKey
 import kr.jadekim.common.encoder.Hex
 import kr.jadekim.common.encoder.decode
 import kotlin.jvm.JvmStatic
@@ -27,13 +27,13 @@ object InjectiveAddress {
     }
 
     @JvmStatic
-    fun createAccountAddress(key: InjectiveSecp256k1PublicKey): Address =
+    fun createAccountAddress(key: InjectivePublicKey): Address =
         Bech32Address(Hrp.ACCOUNT.value, key.toAddressBytes())
 
     @JvmStatic
-    fun createAccountPublicKeyAddress(key: InjectiveSecp256k1PublicKey): Address = Bech32Address(
+    fun createAccountPublicKeyAddress(key: InjectivePublicKey): Address = Bech32Address(
         Hrp.ACCOUNT_PUBLIC_KEY.value,
-        "eb5ae98721".decode(Hex) + key.publicKey
+        "eb5ae98721".decode(Hex) + key.bytes
     )
 
     @JvmStatic

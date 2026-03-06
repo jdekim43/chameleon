@@ -1,16 +1,21 @@
 package kr.jadekim.chameleon.cosmos.wallet
 
-import kr.jadekim.chameleon.core.key.Key
+import kr.jadekim.chameleon.core.key.PrivateKey
+import kr.jadekim.chameleon.core.key.PublicKey
 import kr.jadekim.chameleon.core.mnemonic.Mnemonic
 import kr.jadekim.chameleon.core.wallet.Address
 import kr.jadekim.chameleon.core.wallet.Wallet
 import kr.jadekim.chameleon.cosmos.key.CosmosMnemonicKey
-import kr.jadekim.chameleon.cosmos.key.CosmosSecp256k1PrivateKey
-import kr.jadekim.chameleon.cosmos.key.CosmosSecp256k1PublicKey
+import kr.jadekim.chameleon.cosmos.key.CosmosPrivateKey
+import kr.jadekim.chameleon.cosmos.key.CosmosPublicKey
 import kotlin.jvm.JvmOverloads
 import kotlin.jvm.JvmStatic
 
-class CosmosWallet(override val address: Address, override val key: Key? = null) : Wallet {
+class CosmosWallet(
+    override val address: Address,
+    override val privateKey: PrivateKey? = null,
+    override val publicKey: PublicKey? = privateKey?.createPublicKey(),
+) : Wallet {
 
     companion object {
 
@@ -39,16 +44,17 @@ class CosmosWallet(override val address: Address, override val key: Key? = null)
             index: UInt = 0u,
             password: String? = null,
         ) = create(Mnemonic(mnemonic), coinType, account, change, index, password)
-
-        @JvmStatic
-        @JvmOverloads
-        fun fromKeyPair(
-            privateKey: ByteArray,
-            publicKey: ByteArray? = null,
-        ) = CosmosWallet(CosmosSecp256k1PrivateKey(privateKey, publicKey))
     }
 
-    constructor(key: CosmosSecp256k1PublicKey) : this(CosmosAddress.createAccountAddress(key), key)
+    constructor(
+        publicKey: CosmosPublicKey,
+        privateKey: CosmosPrivateKey? = null
+    ) : this(CosmosAddress.createAccountAddress(publicKey), privateKey, publicKey)
 
-    constructor(publicKey: ByteArray) : this(CosmosSecp256k1PublicKey(publicKey))
+    constructor(privateKey: CosmosPrivateKey) : this(privateKey.createPublicKey(), privateKey)
+
+    constructor(publicKey: ByteArray, privateKey: ByteArray? = null) : this(
+        CosmosPublicKey(publicKey),
+        privateKey?.let { CosmosPrivateKey(it) },
+    )
 }

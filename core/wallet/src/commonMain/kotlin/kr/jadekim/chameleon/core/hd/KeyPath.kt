@@ -1,9 +1,7 @@
 package kr.jadekim.chameleon.core.hd
 
 import kr.jadekim.chameleon.core.hd.KeyPath.Companion.MASTER_ELEMENT_STRING
-import kr.jadekim.chameleon.core.hd.secp256k1.ExtendedPrivateKey
-import kr.jadekim.chameleon.core.hd.secp256k1.HDSecp256k1PrivateKey
-import kr.jadekim.chameleon.core.hd.secp256k1.HDSecp256k1PublicKey
+import kr.jadekim.chameleon.core.key.PrivateKey
 import kotlin.jvm.JvmInline
 
 @JvmInline
@@ -34,11 +32,15 @@ value class KeyPath(val path: List<UInt>) {
 
     constructor(path: String) : this(parsePath(path))
 
-    fun derive(seed: ByteArray): Pair<HDSecp256k1PrivateKey, HDSecp256k1PublicKey> {
-        val privateKey = ExtendedPrivateKey.from(seed)
-            .derive(this)
+    @Suppress("UNCHECKED_CAST")
+    fun <P : PrivateKey> derive(
+        seed: ByteArray,
+        curve: Curve<P>,
+    ): P {
+        val extendedKey = curve.from(seed)
+        val newExtendedKey = extendedKey.derive(this, curve)
 
-        return privateKey.privateKey to privateKey.publicKey
+        return newExtendedKey.key
     }
 
     fun last(): UInt = if (path.isEmpty()) 0u else path.last()

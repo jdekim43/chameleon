@@ -8,6 +8,8 @@ kotlin {
             implementation(libs.jade.common.crypto)
             implementation(libs.jade.common.encoder)
             implementation(libs.acinq.secp256k1)
+            implementation(libs.cryptography.core)
+            implementation(libs.cryptography.provider.optimal)
         }
         jvmMain.dependencies {
 //            implementation(libs.acinq.secp256k1.jni.jvm)

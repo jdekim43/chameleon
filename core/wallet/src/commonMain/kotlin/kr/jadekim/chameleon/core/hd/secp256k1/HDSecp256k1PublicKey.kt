@@ -1,15 +1,14 @@
 package kr.jadekim.chameleon.core.hd.secp256k1
 
 import kr.jadekim.chameleon.core.crypto.secp256k1.Secp256k1
-import kr.jadekim.chameleon.core.hd.secp256k1.schnorr.XOnlyPublicKey
-import kr.jadekim.common.annotation.InDevelopment
+import kr.jadekim.chameleon.core.key.PublicKey
 import kr.jadekim.common.crypto.hash.RIPEMD160
 import kr.jadekim.common.crypto.hash.SHA_256
 import kr.jadekim.common.crypto.hash.hash
 import kr.jadekim.common.encoder.Hex
 import kr.jadekim.common.encoder.encode
 
-open class HDSecp256k1PublicKey(bytes: ByteArray) {
+open class HDSecp256k1PublicKey(bytes: ByteArray) : PublicKey {
 
     val compressed: ByteArray =
         if (isCompressed(bytes)) bytes.copyOf()
@@ -22,13 +21,15 @@ open class HDSecp256k1PublicKey(bytes: ByteArray) {
         else throw IllegalArgumentException("Invalid public key")
     }
 
-    val hash160: ByteArray by lazy {
-        compressed.hash(SHA_256).hash(RIPEMD160)
-    }
-
     init {
         require(bytes.size == BYTE_SIZE_COMPRESSED || bytes.size == BYTE_SIZE_UNCOMPRESSED) { "Invalid public key size" }
         require(isValid()) { "Invalid public key" }
+    }
+
+    override val bytes: ByteArray = compressed
+
+    val hash160: ByteArray by lazy {
+        compressed.hash(SHA_256).hash(RIPEMD160)
     }
 
     companion object {
@@ -71,7 +72,7 @@ open class HDSecp256k1PublicKey(bytes: ByteArray) {
     operator fun times(that: HDSecp256k1PublicKey): HDSecp256k1PublicKey =
         HDSecp256k1PublicKey(Secp256k1.publicKeyTweakMul(compressed, that.compressed))
 
-    fun verify(message: ByteArray, signature: ByteArray): Boolean =
+    override fun verify(message: ByteArray, signature: ByteArray): Boolean =
         Secp256k1.verify(signature, message, compressed)
 
     fun isValid(): Boolean = Secp256k1.isValidPublicKey(compressed)
@@ -80,8 +81,7 @@ open class HDSecp256k1PublicKey(bytes: ByteArray) {
 
     fun isOdd(): Boolean = !isEven()
 
-    @InDevelopment
-    fun toXOnly(): XOnlyPublicKey = XOnlyPublicKey(this)
+    override fun toAddressBytes(): ByteArray = hash160
 
     fun toHex(): String = compressed.encode(Hex)
 

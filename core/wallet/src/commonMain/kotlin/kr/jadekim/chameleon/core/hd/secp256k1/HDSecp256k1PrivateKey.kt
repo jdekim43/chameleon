@@ -3,26 +3,28 @@ package kr.jadekim.chameleon.core.hd.secp256k1
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
 import kr.jadekim.chameleon.core.crypto.secp256k1.Secp256k1
-import kr.jadekim.chameleon.core.hd.secp256k1.schnorr.XOnlyPublicKey
-import kr.jadekim.common.annotation.InDevelopment
+import kr.jadekim.chameleon.core.hd.Curve
+import kr.jadekim.chameleon.core.key.PrivateKey
 import kr.jadekim.common.encoder.Base58WithChecksum
 import kr.jadekim.common.encoder.Hex
 import kr.jadekim.common.encoder.decode
 import kr.jadekim.common.encoder.encode
 
-open class HDSecp256k1PrivateKey(bytes: ByteArray) {
+open class HDSecp256k1PrivateKey(bytes: ByteArray) : PrivateKey {
 
-    val compressed: ByteArray by lazy { uncompressed + 1.toByte() }
     val uncompressed: ByteArray = if (!isCompressed(bytes)) bytes.copyOf() else bytes.copyOf(BYTE_SIZE_UNCOMPRESSED)
+    val compressed: ByteArray by lazy { uncompressed + 1.toByte() }
 
     init {
         require(bytes.size == BYTE_SIZE_COMPRESSED || bytes.size == BYTE_SIZE_UNCOMPRESSED) { "Invalid private key size" }
         require(isValid()) { "Invalid private key" }
     }
 
+    override val bytes: ByteArray = compressed
+
     companion object {
         const val BYTE_SIZE_COMPRESSED = 33
-        const val BYTE_SIZE_UNCOMPRESSED = 32
+        const val BYTE_SIZE_UNCOMPRESSED = Curve.ECDSA.PRIVATE_KEY_SIZE
 
         fun fromBase58(input: String): Pair<UByte, HDSecp256k1PrivateKey> {
             val decoded = input.decode(Base58WithChecksum)
@@ -45,9 +47,9 @@ open class HDSecp256k1PrivateKey(bytes: ByteArray) {
     operator fun times(that: HDSecp256k1PrivateKey): HDSecp256k1PrivateKey =
         HDSecp256k1PrivateKey(Secp256k1.privateKeyTweakMul(uncompressed, that.uncompressed))
 
-    fun sign(message: ByteArray): Deferred<ByteArray> = CompletableDeferred(signSync(message))
+    override fun sign(message: ByteArray): Deferred<ByteArray> = CompletableDeferred(signSync(message))
 
-    fun signSync(message: ByteArray): ByteArray = Secp256k1.sign(message, uncompressed)
+    open fun signSync(message: ByteArray): ByteArray = Secp256k1.sign(message, uncompressed)
 
     fun tweak(tweak: HDSecp256k1PrivateKey): HDSecp256k1PrivateKey {
         val key = if (createPublicKey().isEven()) this else -this
@@ -57,10 +59,7 @@ open class HDSecp256k1PrivateKey(bytes: ByteArray) {
 
     fun isValid(): Boolean = Secp256k1.isValidPrivateKey(uncompressed)
 
-    fun createPublicKey(): HDSecp256k1PublicKey = HDSecp256k1PublicKey(Secp256k1.createPublicKey(uncompressed))
-
-    @InDevelopment
-    fun createXOnlyPublicKey(): XOnlyPublicKey = XOnlyPublicKey(createPublicKey())
+    override fun createPublicKey(): HDSecp256k1PublicKey = HDSecp256k1PublicKey(Secp256k1.createPublicKey(uncompressed))
 
     fun toBase58(version: UByte): String = (byteArrayOf(version.toByte()) + compressed).encode(Base58WithChecksum)
 

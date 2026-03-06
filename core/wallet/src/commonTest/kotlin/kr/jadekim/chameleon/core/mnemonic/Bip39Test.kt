@@ -3,8 +3,10 @@ package kr.jadekim.chameleon.core.mnemonic
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
 import kr.jadekim.chameleon.core.hd.Bip32TestData.VERSION_MAINNET_PRIVATE
-import kr.jadekim.chameleon.core.hd.secp256k1.ExtendedPrivateKey
+import kr.jadekim.chameleon.core.hd.Curve
+import kr.jadekim.chameleon.core.hd.ExtendedKey
 import kr.jadekim.chameleon.core.mnemonic.wordlist.*
+import kr.jadekim.chameleon.core.toBase58PrivateKey
 import kr.jadekim.common.encoder.Hex
 import kr.jadekim.common.encoder.decode
 import kr.jadekim.common.encoder.encode
@@ -50,9 +52,9 @@ class Bip39Test : FunSpec({
                 items.forEach { item ->
                     test(item.seed) {
                         val seed = item.seed.decode(Hex)
-                        val extendedPrivateKey = ExtendedPrivateKey.from(seed)
+                        val extendedPrivateKey = ExtendedKey.from(seed, Curve.Secp256k1)
 
-                        extendedPrivateKey.toBase58(VERSION_MAINNET_PRIVATE) shouldBe item.extendedPrivateKey
+                        extendedPrivateKey.toBase58PrivateKey(VERSION_MAINNET_PRIVATE) shouldBe item.extendedPrivateKey
                     }
                 }
             }

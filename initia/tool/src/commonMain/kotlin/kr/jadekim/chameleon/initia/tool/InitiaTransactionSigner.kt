@@ -10,8 +10,8 @@ import kr.jadekim.chameleon.cosmos.tool.AccountInfo
 import kr.jadekim.chameleon.cosmos.tool.AccountInfoProvider
 import kr.jadekim.chameleon.cosmos.tool.CosmosTransactionDirectSigner
 import kr.jadekim.chameleon.cosmos.tool.CosmosTransactionSigner
-import kr.jadekim.chameleon.initia.key.InitiaEtherSecp256k1PublicKey
-import kr.jadekim.chameleon.initia.key.InitiaSecp256k1PublicKey
+import kr.jadekim.chameleon.initia.key.InitiaCosmosPublicKey
+import kr.jadekim.chameleon.initia.key.InitiaEtherPublicKey
 import kr.jadekim.chameleon.initia.wallet.InitiaAddress
 
 interface InitiaTransactionSigner : CosmosTransactionSigner
@@ -27,11 +27,11 @@ class InitiaTransactionDirectSigner(
 
     override fun List<SignerInfo>.findByAddress(address: String): SignerInfo? = find {
         val addressFromPublicKey = when (it.publicKey.typeUrl) {
-            cosmos.crypto.secp256k1.PubKey.TYPE_URL -> InitiaSecp256k1PublicKey(
+            cosmos.crypto.secp256k1.PubKey.TYPE_URL -> InitiaCosmosPublicKey(
                 cosmos.crypto.secp256k1.PubKeyConverter.deserialize(it.publicKey.value).key
             ).let(InitiaAddress::createAccountAddress)
 
-            initia.crypto.v1beta1.ethsecp256k1.PubKey.TYPE_URL -> InitiaEtherSecp256k1PublicKey(
+            initia.crypto.v1beta1.ethsecp256k1.PubKey.TYPE_URL -> InitiaEtherPublicKey(
                 initia.crypto.v1beta1.ethsecp256k1.PubKeyConverter.deserialize(it.publicKey.value).key
             ).let(InitiaAddress::createAccountAddress)
 
@@ -43,9 +43,9 @@ class InitiaTransactionDirectSigner(
 
     override fun createSignerInfo(key: PublicKey, accountInfo: AccountInfo): SignerInfo {
         val publicKeyAny = when (key) {
-            is InitiaSecp256k1PublicKey -> cosmos.crypto.secp256k1.PubKey(key.publicKey).toAny()
-            is InitiaEtherSecp256k1PublicKey -> initia.crypto.v1beta1.ethsecp256k1.PubKey(key.publicKey).toAny()
-            else -> cosmos.crypto.secp256k1.PubKey(key.publicKey).toAny()
+            is InitiaCosmosPublicKey -> cosmos.crypto.secp256k1.PubKey(key.bytes).toAny()
+            is InitiaEtherPublicKey -> initia.crypto.v1beta1.ethsecp256k1.PubKey(key.bytes).toAny()
+            else -> cosmos.crypto.secp256k1.PubKey(key.bytes).toAny()
         }
         return SignerInfo(
             publicKeyAny,

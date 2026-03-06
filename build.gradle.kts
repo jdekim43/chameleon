@@ -35,7 +35,7 @@ configure(allprojects.filter { !it.hasProperty("IGNORE_GLOBAL_CONFIGURATION") })
     }
 
     kotlin {
-        jvmToolchain(11)
+        jvmToolchain(21)
         jvm {
             testRuns["test"].executionTask.configure {
                 useJUnitPlatform()

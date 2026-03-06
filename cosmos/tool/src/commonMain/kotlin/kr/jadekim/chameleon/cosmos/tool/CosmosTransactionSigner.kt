@@ -79,7 +79,7 @@ open class CosmosTransactionDirectSigner(
     }
 
     protected open fun createSignerInfo(key: PublicKey, accountInfo: AccountInfo) = SignerInfo(
-        cosmos.crypto.secp256k1.PubKey(key.publicKey).toAny(),
+        cosmos.crypto.secp256k1.PubKey(key.bytes).toAny(),
         ModeInfo(ModeInfo.SumOneOf.Single(ModeInfo.Single(SignMode.SIGN_MODE_DIRECT))),
         accountInfo.sequence,
     )

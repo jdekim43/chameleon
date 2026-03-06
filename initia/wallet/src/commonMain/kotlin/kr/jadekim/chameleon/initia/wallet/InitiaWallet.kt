@@ -1,6 +1,7 @@
 package kr.jadekim.chameleon.initia.wallet
 
-import kr.jadekim.chameleon.core.key.Key
+import kr.jadekim.chameleon.core.key.PrivateKey
+import kr.jadekim.chameleon.core.key.PublicKey
 import kr.jadekim.chameleon.core.mnemonic.Mnemonic
 import kr.jadekim.chameleon.core.wallet.Address
 import kr.jadekim.chameleon.core.wallet.Wallet
@@ -8,7 +9,11 @@ import kr.jadekim.chameleon.initia.key.*
 import kotlin.jvm.JvmOverloads
 import kotlin.jvm.JvmStatic
 
-class InitiaWallet(override val address: Address, override val key: Key? = null) : Wallet {
+class InitiaWallet(
+    override val address: Address,
+    override val privateKey: PrivateKey? = null,
+    override val publicKey: PublicKey? = privateKey?.createPublicKey(),
+) : Wallet {
 
     companion object {
 
@@ -63,23 +68,24 @@ class InitiaWallet(override val address: Address, override val key: Key? = null)
             index: UInt = 0u,
             password: String? = null,
         ) = createCosmosKey(Mnemonic(mnemonic), coinType, account, change, index, password)
-
-        @JvmStatic
-        @JvmOverloads
-        fun fromWithEtherKey(
-            privateKey: ByteArray,
-            publicKey: ByteArray? = null,
-        ) = InitiaWallet(InitiaEtherSecp256k1PrivateKey(privateKey, publicKey))
-
-        @JvmStatic
-        @JvmOverloads
-        fun fromWithCosmosKey(
-            privateKey: ByteArray,
-            publicKey: ByteArray? = null,
-        ) = InitiaWallet(InitiaSecp256k1PrivateKey(privateKey, publicKey))
     }
 
-    constructor(key: InitiaSecp256k1PublicKey) : this(InitiaAddress.createAccountAddress(key), key)
+    constructor(
+        publicKey: InitiaCosmosPublicKey,
+        privateKey: InitiaCosmosPrivateKey? = null
+    ) : this(InitiaAddress.createAccountAddress(publicKey), privateKey, publicKey)
 
-    constructor(key: InitiaEtherSecp256k1PublicKey) : this(InitiaAddress.createAccountAddress(key), key)
+    constructor(privateKey: InitiaCosmosPrivateKey) : this(privateKey.createPublicKey(), privateKey)
+
+    constructor(
+        publicKey: InitiaEtherPublicKey,
+        privateKey: InitiaEtherPrivateKey? = null
+    ) : this(InitiaAddress.createAccountAddress(publicKey), privateKey, publicKey)
+
+    constructor(privateKey: InitiaEtherPrivateKey) : this(privateKey.createPublicKey(), privateKey)
+
+    constructor(publicKey: ByteArray, privateKey: ByteArray? = null) : this(
+        InitiaEtherPublicKey(publicKey),
+        privateKey?.let { InitiaEtherPrivateKey(it) },
+    )
 }

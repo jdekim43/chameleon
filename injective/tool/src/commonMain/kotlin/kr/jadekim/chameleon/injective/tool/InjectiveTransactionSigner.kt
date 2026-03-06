@@ -10,7 +10,7 @@ import kr.jadekim.chameleon.cosmos.tool.AccountInfo
 import kr.jadekim.chameleon.cosmos.tool.AccountInfoProvider
 import kr.jadekim.chameleon.cosmos.tool.CosmosTransactionDirectSigner
 import kr.jadekim.chameleon.cosmos.tool.CosmosTransactionSigner
-import kr.jadekim.chameleon.injective.key.InjectiveSecp256k1PublicKey
+import kr.jadekim.chameleon.injective.key.InjectivePublicKey
 import kr.jadekim.chameleon.injective.wallet.InjectiveAddress
 
 interface InjectiveTransactionSigner : CosmosTransactionSigner
@@ -24,13 +24,13 @@ class InjectiveTransactionDirectSigner(
             return@find false
         }
 
-        val publicKey = InjectiveSecp256k1PublicKey(PubKeyConverter.deserialize(it.publicKey.value).key)
+        val publicKey = InjectivePublicKey(PubKeyConverter.deserialize(it.publicKey.value).key)
 
         return@find InjectiveAddress.createAccountAddress(publicKey).text == address
     }
 
     override fun createSignerInfo(key: PublicKey, accountInfo: AccountInfo) = SignerInfo(
-        injective.crypto.v1beta1.ethsecp256k1.PubKey(key.publicKey).toAny(),
+        injective.crypto.v1beta1.ethsecp256k1.PubKey(key.bytes).toAny(),
         ModeInfo(ModeInfo.SumOneOf.Single(ModeInfo.Single(SignMode.SIGN_MODE_DIRECT))),
         accountInfo.sequence,
     )

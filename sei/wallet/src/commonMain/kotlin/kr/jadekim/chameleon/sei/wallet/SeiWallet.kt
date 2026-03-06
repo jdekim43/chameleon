@@ -1,17 +1,21 @@
 package kr.jadekim.chameleon.sei.wallet
 
-import kr.jadekim.chameleon.core.key.Key
+import kr.jadekim.chameleon.core.key.PrivateKey
+import kr.jadekim.chameleon.core.key.PublicKey
 import kr.jadekim.chameleon.core.mnemonic.Mnemonic
 import kr.jadekim.chameleon.core.wallet.Address
 import kr.jadekim.chameleon.core.wallet.Wallet
 import kr.jadekim.chameleon.sei.key.SeiMnemonicKey
-import kr.jadekim.chameleon.sei.key.SeiSecp256k1PrivateKey
-import kr.jadekim.chameleon.sei.key.SeiSecp256k1PublicKey
+import kr.jadekim.chameleon.sei.key.SeiPrivateKey
+import kr.jadekim.chameleon.sei.key.SeiPublicKey
 import kotlin.jvm.JvmOverloads
 import kotlin.jvm.JvmStatic
 
-class SeiWallet(override val address: Address, override val key: Key? = null) : Wallet {
-
+class SeiWallet(
+    override val address: Address,
+    override val privateKey: PrivateKey? = null,
+    override val publicKey: PublicKey? = privateKey?.createPublicKey(),
+) : Wallet {
     companion object {
 
         @JvmStatic
@@ -39,16 +43,17 @@ class SeiWallet(override val address: Address, override val key: Key? = null) : 
             index: UInt = 0u,
             password: String? = null,
         ) = create(Mnemonic(mnemonic), coinType, account, change, index, password)
-
-        @JvmStatic
-        @JvmOverloads
-        fun fromKeyPair(
-            privateKey: ByteArray,
-            publicKey: ByteArray? = null,
-        ) = SeiWallet(SeiSecp256k1PrivateKey(privateKey, publicKey))
     }
 
-    constructor(key: SeiSecp256k1PublicKey) : this(SeiAddress.createAccountAddress(key), key)
+    constructor(
+        publicKey: SeiPublicKey,
+        privateKey: SeiPrivateKey? = null
+    ) : this(SeiAddress.createAccountAddress(publicKey), privateKey, publicKey)
 
-    constructor(publicKey: ByteArray) : this(SeiSecp256k1PublicKey(publicKey))
+    constructor(privateKey: SeiPrivateKey) : this(privateKey.createPublicKey(), privateKey)
+
+    constructor(publicKey: ByteArray, privateKey: ByteArray? = null) : this(
+        SeiPublicKey(publicKey),
+        privateKey?.let { SeiPrivateKey(it) },
+    )
 }

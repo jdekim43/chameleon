@@ -121,7 +121,7 @@ open class CosmosNodeFeeEstimator(
         val sequence = accountInfoProvider.get(sender.address.text)?.sequence ?: 0u
 
         return SignerInfo(
-            PubKey(key.publicKey).toAny(),
+            PubKey(key.bytes).toAny(),
             ModeInfo(ModeInfo.SumOneOf.Single(ModeInfo.Single(SignMode.SIGN_MODE_UNSPECIFIED))),
             sequence,
         )

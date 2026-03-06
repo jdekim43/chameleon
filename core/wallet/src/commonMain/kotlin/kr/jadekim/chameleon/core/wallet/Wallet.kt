@@ -1,7 +1,7 @@
 package kr.jadekim.chameleon.core.wallet
 
 import kotlinx.coroutines.Deferred
-import kr.jadekim.chameleon.core.key.Key
+import kr.jadekim.chameleon.core.key.PrivateKey
 import kr.jadekim.chameleon.core.key.PublicKey
 import kr.jadekim.chameleon.core.key.Signer
 import kr.jadekim.chameleon.core.key.Verifier
@@ -9,13 +9,14 @@ import kr.jadekim.chameleon.core.key.Verifier
 interface Wallet : Verifier, Signer {
 
     val address: Address
-    val key: Key?
+    val privateKey: PrivateKey?
     val publicKey: PublicKey?
-        get() = key as? PublicKey
+
     val verifier: Verifier?
-        get() = key as? Verifier
+        get() = publicKey as? Verifier
+
     val signer: Signer?
-        get() = key as? Signer
+        get() = privateKey as? Signer
 
     override fun verify(message: ByteArray, signature: ByteArray): Boolean {
         val verifier = verifier ?: throw IllegalStateException("verifier is not initialized")
