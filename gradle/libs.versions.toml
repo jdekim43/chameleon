@@ -11,6 +11,7 @@ ksp = "2.3.4"
 goncalossilva-resources = "0.14.1"
 dshatz-ecdsa = "1.0.1"
 ionspin-bignum = "0.3.10"
+andreypfau-curve25519 = "0.0.8"
 
 [plugins]
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
@@ -38,6 +39,7 @@ dshatz-ecdsa = { group = "com.dshatz.kmp", name = "ecdsa", version.ref = "dshatz
 dshatz-ecdsa-iosArm64 = { group = "com.dshatz.kmp", name = "ecdsa-iosarm64", version.ref = "dshatz-ecdsa" }
 dshatz-ecdsa-iosSimulatorArm64 = { group = "com.dshatz.kmp", name = "ecdsa-iossimulatorarm64", version.ref = "dshatz-ecdsa" }
 ionspin-bignum = { group = "com.ionspin.kotlin", name = "bignum", version.ref = "ionspin-bignum" }
+andreypfau-curve25519 = { group = "io.github.andreypfau", name = "curve25519-kotlin", version.ref = "andreypfau-curve25519"}
 
 kotest-framework-engine = { group = "io.kotest", name = "kotest-framework-engine", version.ref = "kotest" }
 kotest-runner-junit5 = { group = "io.kotest", name = "kotest-runner-junit5", version.ref = "kotest" }

@@ -83,7 +83,7 @@ open class HDSecp256r1PublicKey(bytes: ByteArray) : PublicKey {
 
     override fun toAddressBytes(): ByteArray = hash160
 
-    fun toHex(): String = compressed.encode(Hex)
+    fun toHex(): String = bytes.encode(Hex)
 
     override fun toString(): String = toHex()
 
@@ -93,10 +93,10 @@ open class HDSecp256r1PublicKey(bytes: ByteArray) : PublicKey {
 
         other as HDSecp256r1PublicKey
 
-        return compressed.contentEquals(other.compressed)
+        return bytes.contentEquals(other.bytes)
     }
 
     override fun hashCode(): Int {
-        return compressed.contentHashCode()
+        return bytes.contentHashCode()
     }
 }

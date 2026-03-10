@@ -1,5 +1,7 @@
 package kr.jadekim.chameleon.core.hd
 
+import kr.jadekim.chameleon.core.hd.Curve.ECDSA.Companion.PRIVATE_KEY_SIZE
+import kr.jadekim.chameleon.core.hd.ed25519.HDEd25519PrivateKey
 import kr.jadekim.chameleon.core.hd.secp256k1.HDSecp256k1PrivateKey
 import kr.jadekim.chameleon.core.hd.secp256k1.HDSecp256k1PublicKey
 import kr.jadekim.chameleon.core.hd.secp256r1.HDSecp256r1PrivateKey
@@ -106,6 +108,26 @@ interface Curve<P : PrivateKey> {
         }
     }
 
+    object Ed25519 : EdDSA<HDEd25519PrivateKey>() {
+
+        override fun from(seed: ByteArray): ExtendedKey<HDEd25519PrivateKey> {
+            if (seed.size < 16) {
+                throw IllegalArgumentException("Seed should be at least 128 bits")
+            }
+            if (seed.size > 64) {
+                throw IllegalArgumentException("Seed should be at most 512 bits")
+            }
+
+            val I = seed.hash(HMAC_SHA_512, "ed25519 seed".utf8())
+            val IL = I.sliceArray(0 until HDEd25519PrivateKey.BYTE_SIZE_SEED)
+            val IR = I.sliceArray(HDEd25519PrivateKey.BYTE_SIZE_SEED until I.size)
+
+            return ExtendedKey(HDEd25519PrivateKey(IL), IR, 0u, KeyPath.EMPTY, 0u)
+        }
+
+        override fun newPrivateKey(bytes: ByteArray): HDEd25519PrivateKey = HDEd25519PrivateKey(bytes)
+    }
+
     abstract class ECDSA<P : PrivateKey> : Curve<P> {
 
         companion object {
@@ -151,36 +173,40 @@ interface Curve<P : PrivateKey> {
         }
     }
 
-//    open class EdDSA : Curve<> {
-//        override fun derive(
-//            privateKey: ExtendedPrivateKey,
-//            index: UInt
-//        ): ExtendedPrivateKey {
-//            val data = ByteArray(37).apply {
-//                if (index.isHardened) {
-//                    write(0, 0.toByte())
-//                    write(1, privateKey.privateKey.uncompressed)
-//                    write(33, index)
-//                } else {
-//                    write(0, privateKey.publicKey.compressed)
-//                    write(33, index)
-//                }
-//            }
-//
-//            val I = data.hash(HMAC_SHA_512, privateKey.chainCode)
-//            val IL = I.sliceArray(0 until 32)
-//            val IR = I.sliceArray(32 until I.size)
-//
-//            val newPrivateKey = HDSecp256k1PrivateKey(IL)
-//            require(newPrivateKey.isValid()) { "cannot generate child private key: IL is invalid" }
-//
-//            return ExtendedPrivateKey(
-//                newPrivateKey,
-//                IR,
-//                privateKey.depth.inc(),
-//                privateKey.path + index,
-//                privateKey.fingerprint
-//            )
-//        }
-//    }
+    abstract class EdDSA<P : PrivateKey> : Curve<P> {
+
+        abstract fun newPrivateKey(bytes: ByteArray): P
+
+        @Suppress("UNCHECKED_CAST")
+        override fun <K : Key> derive(
+            extendedKey: ExtendedKey<K>,
+            index: UInt
+        ): ExtendedKey<K> {
+            if (!index.isHardened) {
+                throw IllegalArgumentException("Unhardened paths not supported for Ed25519")
+            }
+            val privateKey = extendedKey.key as? PrivateKey
+                ?: throw IllegalArgumentException("Cannot derive hardened key from non-private key")
+
+            val data = ByteArray(37).apply {
+                write(0, 0.toByte())
+                write(1, privateKey.bytes)
+                write(33, index)
+            }
+
+            val I = data.hash(HMAC_SHA_512, extendedKey.chainCode)
+            val IL = I.sliceArray(0 until PRIVATE_KEY_SIZE)
+            val IR = I.sliceArray(PRIVATE_KEY_SIZE until I.size)
+
+            val newPrivateKey = newPrivateKey(IL) as K
+
+            return ExtendedKey(
+                newPrivateKey,
+                IR,
+                extendedKey.depth.inc(),
+                extendedKey.path + index,
+                extendedKey.fingerprint,
+            )
+        }
+    }
 }
