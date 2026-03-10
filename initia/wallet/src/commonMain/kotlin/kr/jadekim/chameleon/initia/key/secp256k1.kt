@@ -1,7 +1,5 @@
 package kr.jadekim.chameleon.initia.key
 
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.Deferred
 import kr.jadekim.chameleon.core.hd.secp256k1.HDSecp256k1PrivateKey
 import kr.jadekim.chameleon.core.hd.secp256k1.HDSecp256k1PublicKey
 import kr.jadekim.common.crypto.hash.SHA_256
@@ -19,6 +17,4 @@ open class InitiaCosmosPrivateKey(bytes: ByteArray) : HDSecp256k1PrivateKey(byte
     override fun createPublicKey(): InitiaCosmosPublicKey = InitiaCosmosPublicKey(super.createPublicKey().bytes)
 
     override fun signSync(message: ByteArray) = super.signSync(message.hash(SHA_256))
-
-    override fun sign(message: ByteArray): Deferred<ByteArray> = CompletableDeferred(signSync(message))
 }

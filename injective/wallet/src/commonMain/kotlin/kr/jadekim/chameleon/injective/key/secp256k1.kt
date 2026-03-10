@@ -1,7 +1,5 @@
 package kr.jadekim.chameleon.injective.key
 
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.Deferred
 import kr.jadekim.chameleon.core.hd.secp256k1.HDSecp256k1PrivateKey
 import kr.jadekim.chameleon.core.hd.secp256k1.HDSecp256k1PublicKey
 import kr.jadekim.common.crypto.hash.KECCAK_256
@@ -24,6 +22,4 @@ open class InjectivePrivateKey(bytes: ByteArray) : HDSecp256k1PrivateKey(bytes) 
         InjectivePublicKey(super.createPublicKey().bytes)
 
     override fun signSync(message: ByteArray) = super.signSync(message.hash(KECCAK_256))
-
-    override fun sign(message: ByteArray): Deferred<ByteArray> = CompletableDeferred(signSync(message))
 }
