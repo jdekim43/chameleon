@@ -28,6 +28,18 @@ value class KeyPath(val path: List<UInt>) {
                 )
             )
         }
+
+        fun bip44Hardened(coinType: UInt, account: UInt, change: UInt, addressIndex: UInt): KeyPath {
+            return KeyPath(
+                listOf(
+                    BIP44_ELEMENT,
+                    coinType.hardened,
+                    account.hardened,
+                    change.hardened,
+                    addressIndex.hardened,
+                )
+            )
+        }
     }
 
     constructor(path: String) : this(parsePath(path))

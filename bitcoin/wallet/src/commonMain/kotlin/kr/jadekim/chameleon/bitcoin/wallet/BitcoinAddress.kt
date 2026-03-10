@@ -2,24 +2,11 @@ package kr.jadekim.chameleon.bitcoin.wallet
 
 import kr.jadekim.chameleon.bitcoin.key.BitcoinPublicKey
 import kr.jadekim.chameleon.core.wallet.Address
+import kr.jadekim.chameleon.core.wallet.Base58CheckAddress
 import kr.jadekim.chameleon.core.wallet.Bech32Address
 import kr.jadekim.common.crypto.hash.SHA_256
 import kr.jadekim.common.crypto.hash.hash
-import kr.jadekim.common.encoder.Base58WithChecksum
-import kotlin.jvm.JvmInline
 import kotlin.jvm.JvmStatic
-
-@JvmInline
-value class Base58CheckAddress(override val text: String) : Address {
-
-    constructor(data: ByteArray) : this(Base58WithChecksum.encode(data))
-
-    constructor(version: UByte, data: ByteArray) : this(byteArrayOf(version.toByte()) + data)
-
-    override val data: ByteArray
-        get() = Base58WithChecksum.decode(text)
-
-}
 
 object BitcoinAddress {
 

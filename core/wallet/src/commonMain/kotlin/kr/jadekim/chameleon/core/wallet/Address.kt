@@ -1,9 +1,7 @@
 package kr.jadekim.chameleon.core.wallet
 
 import kr.jadekim.chameleon.core.crypto.bech32.Bech32
-import kr.jadekim.common.encoder.Hex
-import kr.jadekim.common.encoder.decode
-import kr.jadekim.common.encoder.encode
+import kr.jadekim.common.encoder.*
 import kotlin.jvm.JvmInline
 
 interface Address {
@@ -48,4 +46,28 @@ value class HexAddress(override val text: String) : Address {
 
     override val data: ByteArray
         get() = hexOnlyText.decode(Hex)
+}
+
+@JvmInline
+value class Base58Address(override val text: String) : Address {
+
+    constructor(data: ByteArray) : this(Base58.encode(data))
+
+    constructor(version: UByte, data: ByteArray) : this(byteArrayOf(version.toByte()) + data)
+
+    override val data: ByteArray
+        get() = Base58.decode(text)
+
+}
+
+@JvmInline
+value class Base58CheckAddress(override val text: String) : Address {
+
+    constructor(data: ByteArray) : this(Base58WithChecksum.encode(data))
+
+    constructor(version: UByte, data: ByteArray) : this(byteArrayOf(version.toByte()) + data)
+
+    override val data: ByteArray
+        get() = Base58WithChecksum.decode(text)
+
 }

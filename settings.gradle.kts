@@ -10,6 +10,8 @@ include(
     ":bitcoin:wallet",
     ":ethereum",
     ":ethereum:wallet",
+    ":solana",
+    ":solana:wallet",
     ":cosmos",
     ":cosmos:type",
     ":cosmos:tool",
