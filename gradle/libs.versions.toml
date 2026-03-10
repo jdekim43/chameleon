@@ -9,6 +9,8 @@ acinq-secp256k1 = "0.22.0"
 kotest = "6.0.7"
 ksp = "2.3.4"
 goncalossilva-resources = "0.14.1"
+dshatz-ecdsa = "1.0.1"
+ionspin-bignum = "0.3.10"
 
 [plugins]
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
@@ -32,7 +34,11 @@ doistx-normalize = { group = "com.doist.x", name = "normalize", version = "1.2.0
 jade-common-util = { group = "kr.jadekim", name = "common-util", version.ref = "jade-common" }
 jade-common-encoder = { group = "kr.jadekim", name = "common-encoder", version.ref = "jade-common" }
 jade-common-crypto = { group = "kr.jadekim", name = "common-crypto", version.ref = "jade-common" }
-#web3j-crypto = { group = "", name = "", version = "" }
+dshatz-ecdsa = { group = "com.dshatz.kmp", name = "ecdsa", version.ref = "dshatz-ecdsa" }
+dshatz-ecdsa-iosArm64 = { group = "com.dshatz.kmp", name = "ecdsa-iosarm64", version.ref = "dshatz-ecdsa" }
+dshatz-ecdsa-iosSimulatorArm64 = { group = "com.dshatz.kmp", name = "ecdsa-iossimulatorarm64", version.ref = "dshatz-ecdsa" }
+ionspin-bignum = { group = "com.ionspin.kotlin", name = "bignum", version.ref = "ionspin-bignum" }
+
 kotest-framework-engine = { group = "io.kotest", name = "kotest-framework-engine", version.ref = "kotest" }
 kotest-runner-junit5 = { group = "io.kotest", name = "kotest-runner-junit5", version.ref = "kotest" }
 kotest-assertions-core = { group = "io.kotest", name = "kotest-assertions-core", version.ref = "kotest" }

@@ -2,6 +2,8 @@ package kr.jadekim.chameleon.core.hd
 
 import kr.jadekim.chameleon.core.hd.secp256k1.HDSecp256k1PrivateKey
 import kr.jadekim.chameleon.core.hd.secp256k1.HDSecp256k1PublicKey
+import kr.jadekim.chameleon.core.hd.secp256r1.HDSecp256r1PrivateKey
+import kr.jadekim.chameleon.core.hd.secp256r1.HDSecp256r1PublicKey
 import kr.jadekim.chameleon.core.key.Key
 import kr.jadekim.chameleon.core.key.PrivateKey
 import kr.jadekim.chameleon.core.key.PublicKey
@@ -44,6 +46,7 @@ interface Curve<P : PrivateKey> {
 
                     return newPrivateKey as K
                 }
+
                 is HDSecp256k1PublicKey -> {
                     val newPrivateKey = HDSecp256k1PrivateKey(IL)
                     require(newPrivateKey.isValid()) { "cannot generate child public key: IL is invalid" }
@@ -53,6 +56,51 @@ interface Curve<P : PrivateKey> {
 
                     return newPublicKey as K
                 }
+
+                else -> throw IllegalArgumentException("Not supported key type")
+            }
+        }
+    }
+
+    object Secp256r1 : ECDSA<HDSecp256r1PrivateKey>() {
+
+        override fun from(seed: ByteArray): ExtendedKey<HDSecp256r1PrivateKey> {
+            if (seed.size < 16) {
+                throw IllegalArgumentException("Seed should be at least 128 bits")
+            }
+            if (seed.size > 64) {
+                throw IllegalArgumentException("Seed should be at most 512 bits")
+            }
+
+            val I = seed.hash(HMAC_SHA_512, "Nist256p1 seed".utf8())
+            val IL = I.sliceArray(0 until HDSecp256r1PrivateKey.BYTE_SIZE_UNCOMPRESSED)
+            val IR = I.sliceArray(HDSecp256r1PrivateKey.BYTE_SIZE_UNCOMPRESSED until I.size)
+
+            return ExtendedKey(HDSecp256r1PrivateKey(IL), IR, 0u, KeyPath.EMPTY, 0u)
+        }
+
+        override fun <K : Key> tweak(sourceKey: K, IL: ByteArray): K {
+            var newPrivateKey = HDSecp256r1PrivateKey(IL)
+            require(newPrivateKey.isValid()) { "cannot generate child private key: IL is invalid" }
+
+            when (sourceKey) {
+                is HDSecp256r1PrivateKey -> {
+                    newPrivateKey += sourceKey
+                    require(newPrivateKey.isValid()) { "cannot generate child private key: resulting private key is invalid" }
+
+                    return newPrivateKey as K
+                }
+
+                is HDSecp256r1PublicKey -> {
+                    val newPrivateKey = HDSecp256r1PrivateKey(IL)
+                    require(newPrivateKey.isValid()) { "cannot generate child public key: IL is invalid" }
+
+                    val newPublicKey = newPrivateKey.createPublicKey() + sourceKey
+                    require(newPublicKey.isValid()) { "cannot generate child public key: resulting public key is invalid" }
+
+                    return newPublicKey as K
+                }
+
                 else -> throw IllegalArgumentException("Not supported key type")
             }
         }
@@ -69,7 +117,8 @@ interface Curve<P : PrivateKey> {
         override fun <K : Key> derive(extendedKey: ExtendedKey<K>, index: UInt): ExtendedKey<K> {
             val data = ByteArray(37).apply {
                 if (index.isHardened) {
-                    val privateKey = extendedKey.key as? PrivateKey ?: throw IllegalArgumentException("Cannot derive hardened key from non-private key")
+                    val privateKey = extendedKey.key as? PrivateKey
+                        ?: throw IllegalArgumentException("Cannot derive hardened key from non-private key")
 
                     write(0, 0.toByte())
                     write(1, privateKey.bytes)
